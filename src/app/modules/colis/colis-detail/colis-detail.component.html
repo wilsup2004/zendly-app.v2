@@ -17,12 +17,12 @@
       </div>
       
       <div class="colis-actions">
-        <button *ngIf="canTakeColis" mat-raised-button color="primary" (click)="takeColis()">
+        <button *ngIf="canTakeColis" mat-raised-button  class="custom-button primary" (click)="takeColis()">
           <mat-icon>check_circle</mat-icon>
           Prendre en charge
         </button>
         
-        <button *ngIf="canContactOwner" mat-raised-button color="primary" (click)="contactOwner()">
+        <button *ngIf="canContactOwner" mat-raised-button  class="custom-button primary" (click)="contactOwner()">
           <mat-icon>message</mat-icon>
           Contacter l'expéditeur
         </button>

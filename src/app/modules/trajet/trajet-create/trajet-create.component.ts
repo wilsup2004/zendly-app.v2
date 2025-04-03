@@ -5,9 +5,11 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TrajetService } from '../../../core/services/trajet.service';
 import { PriseEnChargeService } from '../../../core/services/prise-en-charge.service';
+import { ColisService } from '../../../core/services/colis.service'; // Ajout du service Colis
 import { AuthService } from '../../../core/services/auth.service';
 import { Aeroport } from '../../../core/models/aeroport.model';
 import { Vol } from '../../../core/models/vol.model';
+import { Colis } from '../../../core/models/colis.model'; // Ajout du modèle Colis
 import { User } from '../../../core/models/user.model';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { finalize } from 'rxjs/operators';
@@ -42,6 +44,15 @@ export class TrajetCreateComponent implements OnInit {
   foundVols: Vol[] = [];
   selectedVol: Vol | null = null;
   searchingFlights = false;
+
+  // Gestion des colis
+  userColis: Colis[] = [];
+  selectedColis: Colis | null = null;
+  loadingColis = false;
+  colisCompatibles: Colis[] = [];
+  
+  // Étape courante
+  currentStep = 1; // 1 = info trajet, 2 = sélection colis
   
   constructor(
     private fb: FormBuilder,
@@ -49,6 +60,7 @@ export class TrajetCreateComponent implements OnInit {
     private snackBar: MatSnackBar,
     private trajetService: TrajetService,
     private priseEnChargeService: PriseEnChargeService,
+    private colisService: ColisService, // Ajout du service Colis
     private authService: AuthService
   ) {}
   
@@ -61,6 +73,11 @@ export class TrajetCreateComponent implements OnInit {
     
     // Charger les aéroports
     this.loadAeroports();
+
+    // Charger les colis de l'utilisateur
+    if (this.currentUser) {
+      this.loadUserColis();
+    }
   }
   
   private initForm(): void {
@@ -81,6 +98,143 @@ export class TrajetCreateComponent implements OnInit {
       // Capacité
       nbKilo: [5, [Validators.required, Validators.min(1), Validators.max(30)]]
     });
+  }
+  
+  // Charger les colis de l'utilisateur
+  loadUserColis(): void {
+    this.loadingColis = true;
+    
+    if (!this.currentUser) {
+      this.loadingColis = false;
+      return;
+    }
+    
+    // Utiliser la méthode getColisDiponibles pour ne récupérer que les colis qui ne sont pas déjà associés
+    this.colisService.getColisDiponibles(this.currentUser.idUser)
+      .pipe(finalize(() => {
+        this.loadingColis = false;
+      }))
+      .subscribe({
+        next: (colis) => {
+          this.userColis = colis;
+          console.log(`Colis disponibles chargés: ${this.userColis.length} colis disponibles`);
+          
+          // Si nous sommes déjà à l'étape 2, filtrer immédiatement les colis compatibles
+          if (this.currentStep === 2) {
+            const villeDepart = this.trajetForm.get('villeDepart')?.value;
+            const villeArrivee = this.trajetForm.get('villeArrivee')?.value;
+            if (villeDepart && villeArrivee) {
+              this.applyColisFilter(villeDepart, villeArrivee);
+            }
+          }
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement des colis:', error);
+          this.snackBar.open('Erreur lors du chargement des colis', 'Fermer', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+  }
+  
+  // Filtrer les colis compatibles avec le trajet
+  filterCompatibleColis(): void {
+    const villeDepart = this.trajetForm.get('villeDepart')?.value;
+    const villeArrivee = this.trajetForm.get('villeArrivee')?.value;
+    
+    if (!villeDepart || !villeArrivee || !this.currentUser) {
+      this.colisCompatibles = [];
+      return;
+    }
+    
+    // Charger directement les colis compatibles avec le trajet et disponibles (statut 1 - Créé)
+    this.loadingColis = true;
+    this.colisService.getColisByTrajetAndStatut(villeDepart, villeArrivee, 1, this.currentUser.idUser)
+      .pipe(finalize(() => {
+        this.loadingColis = false;
+      }))
+      .subscribe({
+        next: (colis) => {
+          console.log(`Colis compatibles chargés directement: ${colis.length} colis disponibles`);
+          this.colisCompatibles = colis;
+          
+          // Si aucun colis compatible n'est trouvé, charger tous les colis de l'utilisateur
+          // pour afficher un message approprié
+          if (this.colisCompatibles.length === 0) {
+            this.loadUserColis();
+          }
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement des colis compatibles:', error);
+          this.snackBar.open('Erreur lors du chargement des colis compatibles', 'Fermer', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+  }
+  
+  // Applique les filtres sur les colis
+  private applyColisFilter(villeDepart: string, villeArrivee: string): void {
+    console.log('Filtrage des colis - Trajet:', villeDepart, '->', villeArrivee);
+    console.log('Nombre de colis disponibles:', this.userColis.length);
+    
+    // Filtrer les colis qui correspondent exactement au trajet
+    let exactMatches = this.userColis.filter(colis => {
+      return colis.villeDepart.toLowerCase() === villeDepart.toLowerCase() && 
+             colis.villeArrivee.toLowerCase() === villeArrivee.toLowerCase();
+    });
+    
+    // Si aucune correspondance exacte, utiliser une correspondance partielle
+    if (exactMatches.length === 0) {
+      exactMatches = this.userColis.filter(colis => {
+        return colis.villeDepart.toLowerCase().includes(villeDepart.toLowerCase()) && 
+               colis.villeArrivee.toLowerCase().includes(villeArrivee.toLowerCase());
+      });
+    }
+    
+    this.colisCompatibles = exactMatches;
+    console.log('Colis compatibles trouvés:', this.colisCompatibles.length);
+  }
+  
+  // Sélectionner un colis
+  selectColis(colis: Colis): void {
+    this.selectedColis = colis;
+  }
+  
+  // Aller à l'étape suivante
+  nextStep(): void {
+    if (this.currentStep === 1) {
+      if (this.trajetForm.invalid) {
+        // Marquer tous les champs comme touchés pour afficher les erreurs
+        Object.keys(this.trajetForm.controls).forEach(key => {
+          this.trajetForm.get(key)?.markAsTouched();
+        });
+        return;
+      }
+      
+      // Filtrer les colis compatibles et passer à l'étape suivante
+      this.loadingColis = true;
+      this.filterCompatibleColis();
+      this.currentStep = 2;
+      
+      // Si les colis n'ont pas encore été chargés, le chargement sera géré dans filterCompatibleColis()
+      if (this.userColis.length > 0) {
+        this.loadingColis = false;
+      }
+    }
+  }
+  
+  // Revenir à l'étape précédente
+  previousStep(): void {
+    if (this.currentStep === 2) {
+      this.currentStep = 1;
+    }
   }
   
   private loadAeroports(): void {
@@ -197,9 +351,33 @@ export class TrajetCreateComponent implements OnInit {
     });
   }
   
+  // Créer un nouveau colis
+  createNewColis(): void {
+    // Rediriger vers la page de création de colis avec les paramètres du trajet
+    const villeDepart = this.trajetForm.get('villeDepart')?.value;
+    const villeArrivee = this.trajetForm.get('villeArrivee')?.value;
+    
+    this.router.navigate(['/colis/create'], {
+      queryParams: {
+        villeDepart,
+        villeArrivee,
+        fromTrajet: 'true'
+      }
+    });
+  }
+  
   // Soumettre le formulaire
   onSubmit(): void {
-    if (this.trajetForm.invalid) {
+    if (this.trajetForm.invalid || !this.selectedColis) {
+      // Afficher un message d'erreur si aucun colis n'est sélectionné
+      if (!this.selectedColis) {
+        this.snackBar.open('Veuillez sélectionner un colis à transporter', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        });
+      }
       return;
     }
     
@@ -214,9 +392,10 @@ export class TrajetCreateComponent implements OnInit {
     
     this.loading = true;
     
-    // Créer l'objet trajet (UsersDispo dans le backend)
+    // Créer l'objet trajet (PriseEnCharge dans le backend)
     const trajet = {
       users: this.currentUser,
+      colis: this.selectedColis, // Associer le colis sélectionné
       idVol: this.trajetForm.get('idVol')?.value,
       villeDepart: this.trajetForm.get('villeDepart')?.value,
       dateDepart: this.trajetForm.get('dateDepart')?.value,
@@ -241,6 +420,8 @@ export class TrajetCreateComponent implements OnInit {
             horizontalPosition: 'center',
             verticalPosition: 'bottom'
           });
+          
+          // S'assurer que la redirection se fait vers la page de gestion des trajets
           this.router.navigate(['/trajet']);
         },
         error: (error) => {

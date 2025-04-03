@@ -18,8 +18,22 @@
   mat-form-field {
     flex: 1;
     min-width: 150px;
+   --mdc-outlined-text-field-outline-color:var(--text-color);
+  --mdc-icon-button-icon-color:var(--text-color); /* Couleur des icônes */
   }
 }
+
+/*
+::ng-deep mat-form-field input, 
+::ng-deep mat-form-field textarea {
+  color: #ffffff !important;  //Texte de l'input 
+}
+
+::ng-deep .mdc-floating-label {
+  color: #ffffff !important;
+}
+*/
+
 
 ::ng-deep .mat-form-field-wrapper {
   margin-bottom: -1.25em;

@@ -1,6 +1,23 @@
 /* src/app/modules/colis/colis-create/colis-create.component.scss */
 .create-colis-container {
-  padding: 24px;
+  padding: 15px;
+  min-height: 80vh;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
+}
+
+mat-horizontal-stepper {
+  background-color: var(--card-background);
+  background-image: var(--background-gradient);
+}
+
+.mat-mdc-button .mdc-button__label{
+  color: var(--text-color)!important;
+}
+
+.mat-step-text-label {
+  color: var(--text-color);
 }
 
 .create-colis-header {
@@ -20,6 +37,7 @@
     color: var(--text-color-secondary);
   }
 }
+
 
 .create-colis-content {
   max-width: 1000px;
@@ -129,6 +147,31 @@ form {
       margin: 0 auto;
     }
   }
+
+  .theme-button.next-button {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    
+    &:hover:not([disabled]) {
+      background-color: var(--accent-color);
+      box-shadow: var(--hover-glow);
+    }
+    
+    &[disabled] {
+      background-color: rgba(0, 0, 0, 0.12);
+      color: rgba(0, 0, 0, 0.38);
+    }
+  }
+  
+  .prev-button {
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    
+    &:hover {
+      background-color: var(--translucent-bg);
+    }
+  }
+
 }
 
 .recap-container {

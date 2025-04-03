@@ -10,11 +10,12 @@ import { catchError, map } from 'rxjs/operators';
 })
 export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
-
+/*
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | boolean {
+    
     if (this.authService.isLoggedIn) {
       // Vérifier si le token est valide
       return this.authService.checkToken().pipe(
@@ -36,6 +37,20 @@ export class AuthGuard implements CanActivate {
       return false;
     }
   }
+*/
+canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+  // Vérifiez si l'utilisateur est connecté
+  if (this.authService.isLoggedIn) {
+    return true;
+  }
+  
+  // Rediriger vers /auth/login au lieu de /login
+  this.router.navigate(['/auth/login'], {
+    queryParams: { returnUrl: state.url }
+  });
+  return false;
+}
+
 
   private handleAuthError(): void {
     this.authService.logout();

@@ -4,7 +4,9 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors }
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
-import { finalize } from 'rxjs/operators';
+import { finalize, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { User } from 'src/app/core/models/user.model';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -17,6 +19,10 @@ export class RegisterComponent implements OnInit {
   hidePassword = true;
   hideConfirmPassword = true;
   errorMessage: string | null = null;
+  
+  // Variables pour la vérification du pseudo
+  checkingPseudo = false;
+  pseudoAvailable = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -32,7 +38,13 @@ export class RegisterComponent implements OnInit {
     this.registerForm = this.formBuilder.group({
       nom: ['', [Validators.required, Validators.minLength(2)]],
       prenom: ['', [Validators.required, Validators.minLength(2)]],
+      pseudo: ['', [
+        Validators.required, 
+        Validators.minLength(3),
+        Validators.pattern(/^[a-zA-Z0-9_]+$/)
+      ]],
       email: ['', [Validators.required, Validators.email]],
+      telephone: ['', [Validators.pattern(/^[0-9]{10}$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
       acceptTerms: [false, Validators.requiredTrue]
@@ -42,6 +54,33 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Écouter les changements du champ pseudo pour vérifier sa disponibilité
+    this.registerForm.get('pseudo')?.valueChanges
+      .pipe(
+        debounceTime(500), // Attendre 500ms après que l'utilisateur ait arrêté de taper
+        distinctUntilChanged(),
+        switchMap(pseudo => {
+          if (!pseudo || pseudo.length < 3) {
+            this.checkingPseudo = false;
+            this.pseudoAvailable = false;
+            return of(null);
+          }
+          
+          this.checkingPseudo = true;
+          return this.authService.checkPseudoAvailability(pseudo);
+        })
+      )
+      .subscribe(result => {
+        this.checkingPseudo = false;
+        
+        if (result === null) return;
+        
+        this.pseudoAvailable = result;
+        
+        if (!this.pseudoAvailable) {
+          this.registerForm.get('pseudo')?.setErrors({ pseudoTaken: true });
+        }
+      });
   }
 
   // Faciliter l'accès aux contrôles du formulaire
@@ -65,6 +104,11 @@ export class RegisterComponent implements OnInit {
   onSubmit(): void {
     // Arrêter le traitement si le formulaire est invalide
     if (this.registerForm.invalid) {
+      // Marquer tous les champs comme touchés pour montrer les erreurs
+      Object.keys(this.registerForm.controls).forEach(key => {
+        const control = this.registerForm.get(key);
+        control?.markAsTouched();
+      });
       return;
     }
 
@@ -72,56 +116,51 @@ export class RegisterComponent implements OnInit {
     this.errorMessage = null;
 
     // Créer l'objet utilisateur à partir du formulaire
-    const user = {
-      idUser: this.generateUserId(),
-      nom: this.f['nom'].value,
-      prenom: this.f['prenom'].value,
-      mail: this.f['email'].value,
-      password: this.f['password'].value,
-      usersProfils: [{
-        id: {
-          idUser: '',
-          idProfil: 2 // Profil utilisateur standard
-        },
-        profil: {
-          idProfil: 2,
-          libelProfil: 'User'
-        },
-        dateInit: new Date(),
-        note: 0
-      }],
-      isActive:false
+    const user: User = {
+      idUser: this.registerForm.value.pseudo, // Utiliser le pseudo comme idUser
+      nom: this.registerForm.value.nom,
+      prenom: this.registerForm.value.prenom,
+      mail: this.registerForm.value.email,
+      password: this.registerForm.value.password,
+      telephone: this.registerForm.value.telephone || '', // Nouveau champ ajouté
+      isActif: true, // Par défaut, l'utilisateur est actif à l'inscription
+
+      // isActive: true, // Garder la compatibilité avec le modèle existant
+      usersProfils: [], // Sera généralement initialisé côté serveur
+
+      // Propriétés du modèle existant
+      colis: [],
+      priseEnCharges: [],
+      usersTrades: [],
+      adresse: this.registerForm.value.adresse || '',
+      complementAdresse:  this.registerForm.value.complementAdresse || '',
+      codePostal: this.registerForm.value.codePostal || '',
+      ville:  this.registerForm.value.ville || '',
+      pays:  this.registerForm.value.pays || ''
     };
 
     this.authService.register(user)
-      .pipe(finalize(() => {
-        this.loading = false;
-      }))
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
       .subscribe({
         next: () => {
-          this.snackBar.open('Inscription réussie, vous pouvez maintenant vous connecter', 'Fermer', {
-            duration: 5000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom'
+          this.snackBar.open('Inscription réussie! Vous pouvez maintenant vous connecter.', 'Fermer', {
+            duration: 5000
           });
           this.router.navigate(['/auth/login']);
         },
-        error: (error) => {
-          this.errorMessage = error.message || 'Une erreur est survenue lors de l\'inscription';
-          this.snackBar.open(this.errorMessage, 'Fermer', {
-            duration: 5000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-            panelClass: ['error-snackbar']
-          });
+        error: (err) => {
+          console.error('Erreur lors de l\'inscription', err);
+          if (err.error?.code === 'PSEUDO_ALREADY_EXISTS') {
+            this.errorMessage = 'Ce pseudo est déjà utilisé. Veuillez en choisir un autre.';
+            this.registerForm.get('pseudo')?.setErrors({ pseudoTaken: true });
+          } else {
+            this.errorMessage = err.error?.message || 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.';
+          }
         }
       });
-  }
-
-  // Générer un ID utilisateur unique basé sur le prénom, le nom et un timestamp
-  private generateUserId(): string {
-    const timestamp = new Date().getTime().toString().slice(-4);
-    const prefix = this.f['prenom'].value.slice(0, 1).toUpperCase() + this.f['nom'].value.slice(0, 1).toUpperCase();
-    return prefix + timestamp;
   }
 }

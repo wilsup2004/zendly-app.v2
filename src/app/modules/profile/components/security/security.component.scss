@@ -1,0 +1,120 @@
+/* src/app/modules/profile/components/security/security.component.scss (modifié) */
+.security-container {
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin: 0 0 8px 0;
+    /* Ajout d'un texte shadow pour améliorer la visibilité sur les fonds sombres */
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+  }
+  
+  p {
+    color: var(--text-color-secondary);
+    margin: 0 0 24px 0;
+    font-size: 0.9rem;
+  }
+}
+
+.form-row {
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Styles pour les champs de mot de passe */
+.password-field {
+  position: relative;
+  
+  .mat-icon {
+    color: var(--text-color-secondary) !important;
+  }
+  
+  /* Style pour le bouton de visibilité du mot de passe */
+  ::ng-deep .mat-form-field-suffix {
+    .mat-icon-button {
+      color: var(--text-color-secondary) !important;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    /* Améliorer la visibilité des boutons */
+    &.mat-flat-button.mat-primary {
+      background-color: var(--accent-color);
+      color: white;
+      /* Ajout d'une ombre pour plus de contraste */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    &.mat-stroked-button {
+      border-color: var(--text-color-secondary);
+      color: var(--text-color);
+    }
+    
+    mat-spinner {
+      margin: 0;
+    }
+  }
+}
+
+/* Assurer la visibilité des labels de champs */
+::ng-deep .mat-form-field-label {
+  color: var(--text-color) !important;
+  font-weight: 500 !important;
+}
+
+/* Améliorer le contraste des bordures de champs */
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Indicateur de force du mot de passe */
+.password-strength {
+  margin-top: 8px;
+  
+  .strength-meter {
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+    background-color: rgba(0, 0, 0, 0.1);
+    
+    .meter-value {
+      height: 100%;
+      transition: width 0.3s ease;
+      
+      &.weak {
+        width: 33%;
+        background-color: #f44336;
+      }
+      
+      &.medium {
+        width: 66%;
+        background-color: #ff9800;
+      }
+      
+      &.strong {
+        width: 100%;
+        background-color: #4caf50;
+      }
+    }
+  }
+  
+  .strength-text {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    margin-top: 4px;
+  }
+}

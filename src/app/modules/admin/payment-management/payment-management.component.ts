@@ -16,6 +16,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { AppConfigService } from '../../../core/services/app-config.service';
 
 interface PaymentFilter {
   status: string | null;
@@ -42,7 +43,7 @@ export class PaymentManagementComponent implements OnInit, OnDestroy {
   
   payments: Payment[] = [];
   dataSource: MatTableDataSource<Payment> = new MatTableDataSource<Payment>();
-  displayedColumns: string[] = ['idPayment', 'paymentDate', 'user.nom', 'colis.idColis', 'paymentAmount', 'paymentMethod.methodName', 'paymentStatus', 'actions'];
+  displayedColumns: string[] = ['idPayment', 'paymentDate', 'user.nom', 'colis.idColis', 'paymentAmount','baseAmount','serviceFees', 'paymentMethod.methodName', 'paymentStatus', 'actions'];
   
   filter: PaymentFilter = {
     status: null,
@@ -78,13 +79,18 @@ export class PaymentManagementComponent implements OnInit, OnDestroy {
     completedAmount: 0
   };
   
+  // Dans la classe PaymentManagementComponent, ajouter ces propriétés
+serviceFeesPercentage: number = 0;
+totalFees: number = 0;
+
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private adminService: AdminService,
     private authService: AuthService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private appConfigService: AppConfigService
   ) {
     this.filterForm = this.fb.group({
       status: [null],
@@ -103,6 +109,11 @@ export class PaymentManagementComponent implements OnInit, OnDestroy {
     
     // Charger les méthodes de paiement pour le filtre
     this.loadPaymentMethods();
+
+    // Charger la configuration des frais de service
+  this.appConfigService.config$.subscribe(config => {
+    this.serviceFeesPercentage = config.serviceFeesPercentage;
+  });
     
     // S'abonner aux changements du formulaire
     this.filterForm.valueChanges
@@ -221,6 +232,11 @@ export class PaymentManagementComponent implements OnInit, OnDestroy {
       this.stats.total++;
       this.stats.totalAmount += payment.paymentAmount;
       
+      // Calculer les frais de service
+      const serviceFees = payment.serviceFees || 
+      (payment.baseAmount ? payment.paymentAmount - payment.baseAmount : 0);
+      this.totalFees += serviceFees;
+
       switch (payment.paymentStatus) {
         case 'COMPLETED':
           this.stats.completed++;
@@ -458,7 +474,15 @@ export class PaymentManagementComponent implements OnInit, OnDestroy {
           <span class="detail-value">{{data.transactionId}}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">Montant:</span>
+          <span class="detail-label">Prix du colis:</span>
+          <span class="detail-value">{{data.baseAmount || '—'}} €</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Frais de service:</span>
+          <span class="detail-value">{{data.serviceFees || (data.baseAmount ? (data.paymentAmount - data.baseAmount) : '—') | number:'1.2-2'}} €</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Montant total:</span>
           <span class="detail-value">{{data.paymentAmount}} €</span>
         </div>
         <div class="detail-row">

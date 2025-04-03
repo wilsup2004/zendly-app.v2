@@ -1,0 +1,78 @@
+<!-- src/app/modules/profile/profile.component.html -->
+<div class="profile-container">
+  <div class="profile-header">
+    <h1>Mon profil</h1>
+    <p>Gérez et mettez à jour vos informations personnelles</p>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement de votre profil...</p>
+  </div>
+
+  <div class="profile-content" *ngIf="!loading && currentUser">
+    <div class="profile-grid">
+      <!-- Carte de profil avec photo -->
+      <mat-card class="profile-card">
+        <mat-card-content>
+          <div class="profile-photo-section">
+            <app-photo-upload 
+              [currentPhotoUrl]="profilePhotoUrl" 
+              (photoUploaded)="onPhotoUploaded($event)">
+            </app-photo-upload>
+            
+            <div class="profile-user-info">
+              <h2>{{ currentUser.prenom }} {{ currentUser.nom }}</h2>
+              <p>{{ currentUser.mail }}</p>
+              <p>
+                {{ currentUser.telephone || 'Aucun téléphone' }}
+              </p>
+            </div>
+          </div>
+          
+          <mat-divider class="my-16"></mat-divider>
+          
+          <!-- Statistiques utilisateur -->
+          <div class="user-stats">
+            <div class="stat-item">
+              <div class="stat-value">{{ currentUser.colis?.length || 0 }}</div>
+              <div class="stat-label">Colis</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-value">{{ currentUser.priseEnCharges?.length || 0 }}</div>
+              <div class="stat-label">Trajets</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-value">{{ currentUser.usersTrades?.length || 0 }}</div>
+              <div class="stat-label">Échanges</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Onglets d'édition -->
+      <mat-card class="profile-edit-card">
+        <mat-tab-group>
+          <mat-tab label="Informations personnelles">
+            <div class="tab-content">
+              <app-personal-info 
+                [currentUser]="currentUser" 
+                (infoUpdated)="onPersonalInfoUpdated($event)">
+              </app-personal-info>
+            </div>
+          </mat-tab>
+          
+          <mat-tab label="Sécurité">
+            <div class="tab-content">
+              <app-security 
+                (passwordChanged)="onPasswordChanged($event)">
+              </app-security>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
+    </div>
+  </div>
+</div>

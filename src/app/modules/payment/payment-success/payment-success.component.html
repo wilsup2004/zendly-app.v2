@@ -71,10 +71,23 @@
       
       <mat-divider></mat-divider>
       
-      <div class="detail-total">
-        <div class="total-label">Total payé :</div>
-        <div class="total-value">{{ paymentDetails.paymentAmount }} €</div>
-      </div>
+        <div class="detail-item">
+          <div class="detail-label">Prix du colis :</div>
+          <div class="detail-value">{{ paymentDetails?.baseAmount || paymentDetails?.colis?.tarif }} €</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label">Frais de service :</div>
+          <div class="detail-value">{{ paymentDetails?.serviceFees || 
+                     ((paymentDetails?.paymentAmount - paymentDetails?.baseAmount) | number:'1.2-2') }} €</div>
+        </div>
+        
+        <mat-divider></mat-divider>
+        
+        <div class="detail-total">
+          <div class="total-label">Total payé :</div>
+          <div class="total-value">{{ paymentDetails?.paymentAmount }} €</div>
+        </div>
     </div>
     
     <div class="success-message">

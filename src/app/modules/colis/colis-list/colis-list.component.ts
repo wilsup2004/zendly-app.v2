@@ -86,7 +86,7 @@ export class ColisListComponent implements OnInit {
   loadUserColis(): void {
     if (!this.currentUser) return;
     
-    this.colisService.getColisByUserAndStatut(this.currentUser.idUser, this.filter.statut || undefined)
+    this.colisService.getColisByUserAndStatut( this.filter.statut, this.currentUser.idUser)
       .subscribe({
         next: (data) => {
           this.colis = data;

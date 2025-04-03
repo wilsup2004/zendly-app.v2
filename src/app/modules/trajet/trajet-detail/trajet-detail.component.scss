@@ -1,6 +1,10 @@
 /* src/app/modules/trajet/trajet-detail/trajet-detail.component.scss */
 .trajet-detail-container {
   padding: 24px;
+  min-height: 80vh;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .loading-state {
@@ -82,6 +86,20 @@
     align-items: center;
     gap: 8px;
   }
+
+  .custom-button {
+  
+    color: var(--text-color)!important;
+  
+    &.primary {
+      background-color: var(--primary-color) !important;
+    }
+    &.accent {
+      background-color: var(--accent-color) !important;
+    }
+  
+  }
+  
 }
 
 .status-badge {
@@ -268,6 +286,20 @@ mat-card {
     margin-bottom: 16px;
     color: var(--text-color-secondary);
   }
+
+  .custom-button {
+  
+    color: var(--text-color)!important;
+  
+    &.primary {
+      background-color: var(--primary-color) !important;
+    }
+    &.accent {
+      background-color: var(--accent-color) !important;
+    }
+  
+  }
+
 }
 
 .colis-list {
@@ -290,6 +322,19 @@ mat-card {
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--glow-effect);
+  }
+
+  .custom-button {
+  
+    color: var(--text-color)!important;
+  
+    &.primary {
+      background-color: var(--primary-color) !important;
+    }
+    &.accent {
+      background-color: var(--accent-color) !important;
+    }
+  
   }
 }
 

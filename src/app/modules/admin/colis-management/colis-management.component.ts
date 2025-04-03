@@ -1,6 +1,6 @@
 // src/app/modules/admin/colis-management/colis-management.component.ts
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -58,6 +58,9 @@ export class ColisManagementComponent implements OnInit {
     { idStatut: 8, libelStatut: 'Livré' }
   ];
   
+  // Variable pour afficher/masquer les filtres avancés
+  showAdditionalFilters = false;
+  
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -111,7 +114,7 @@ export class ColisManagementComponent implements OnInit {
                 case 'statut':
                   return item.statuts.libelStatut;
                 default:
-                  return item.statuts.libelStatut;
+                  return (item as any)[property];
               }
             };
             
@@ -144,36 +147,39 @@ export class ColisManagementComponent implements OnInit {
   applyFilters(): void {
     const filters = this.filterForm.value;
     
-    // Réinitialiser le filtre de texte
-    this.dataSource.filter = '';
+    // Créer une copie de toutes les données pour filtrer
+    let filteredData = [...this.dataSource.data];
     
     // Filtrer par statut
     if (filters.statut !== null) {
-      this.dataSource.data = this.dataSource.data.filter(colis => 
+      filteredData = filteredData.filter(colis => 
         colis.statuts.idStatut === filters.statut
       );
     }
     
     // Filtrer par ville de départ
     if (filters.villeDepart) {
-      this.dataSource.data = this.dataSource.data.filter(colis => 
+      filteredData = filteredData.filter(colis => 
         colis.villeDepart.toLowerCase().includes(filters.villeDepart.toLowerCase())
       );
     }
     
     // Filtrer par ville d'arrivée
     if (filters.villeArrivee) {
-      this.dataSource.data = this.dataSource.data.filter(colis => 
+      filteredData = filteredData.filter(colis => 
         colis.villeArrivee.toLowerCase().includes(filters.villeArrivee.toLowerCase())
       );
     }
     
     // Filtrer par ID utilisateur
     if (filters.userId) {
-      this.dataSource.data = this.dataSource.data.filter(colis => 
+      filteredData = filteredData.filter(colis => 
         colis.users.idUser.toLowerCase().includes(filters.userId.toLowerCase())
       );
     }
+    
+    // Mise à jour des données filtrées
+    this.dataSource.data = filteredData;
     
     // Mettre à jour le paginateur
     if (this.dataSource.paginator) {
@@ -188,7 +194,7 @@ export class ColisManagementComponent implements OnInit {
       villeArrivee: '',
       userId: ''
     });
-    this.loadColis();
+    this.loadColis(); // Recharger toutes les données
   }
   
   applyTextFilter(event: Event): void {
@@ -237,8 +243,7 @@ export class ColisManagementComponent implements OnInit {
             this.dataSource._updateChangeSubscription();
           }
           
-          this.snackBar.open('Statut du colis mis à jour avec succès', 'Fermer', {
-            duration: 3000,
+          this.snackBar.open('Statut du colis mis à jour avec succès', 'Fermer', {duration: 3000,
             horizontalPosition: 'center',
             verticalPosition: 'bottom'
           });

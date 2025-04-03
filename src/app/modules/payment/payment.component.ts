@@ -13,6 +13,7 @@ import { User } from '../../core/models/user.model';
 import { PaymentMethod } from '../../core/models/payment.model';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { AppConfigService } from '../../core/services/app-config.service';
 
 @Component({
   selector: 'app-payment',
@@ -40,6 +41,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
   errorMessage = '';
   
   paymentForm: FormGroup;
+
+  serviceFeesPercentage: number = 0;
+  serviceFeesAmount: number = 0;
+  totalAmount: number = 0;
   
   constructor(
     private fb: FormBuilder,
@@ -49,7 +54,8 @@ export class PaymentComponent implements OnInit, OnDestroy {
     private paymentService: PaymentService,
     private colisService: ColisService,
     private priseEnChargeService: PriseEnChargeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private appConfigService: AppConfigService 
   ) {
     this.paymentForm = this.fb.group({
       paymentMethod: ['', Validators.required],
@@ -98,6 +104,16 @@ export class PaymentComponent implements OnInit, OnDestroy {
         this.selectedMethod = this.paymentMethods.find(m => m.idMethod === methodId) || null;
         this.updateValidation();
       });
+
+    // Charger les paramètres de configuration
+  this.appConfigService.config$.subscribe(config => {
+    this.serviceFeesPercentage = config.serviceFeesPercentage;
+    // Recalculer les montants si le colis est déjà chargé
+    if (this.colis) {
+      this.calculateAmounts();
+    }
+  });
+
   }
   
   ngOnDestroy(): void {
@@ -105,6 +121,15 @@ export class PaymentComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
   
+  // Ajouter cette méthode pour calculer les montants
+calculateAmounts(): void {
+  if (this.colis && this.colis.tarif) {
+    const baseAmount = this.colis.tarif;
+    this.serviceFeesAmount = this.appConfigService.calculateServiceFees(baseAmount);
+    this.totalAmount = this.appConfigService.calculateTotalAmount(baseAmount);
+  }
+}
+
   loadData(): void {
     this.loading = true;
     this.error = false;
@@ -116,6 +141,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (colis) => {
             this.colis = colis;
+            this.calculateAmounts(); // Calculer les montants
             
             // Si on a aussi un ID de prise en charge, le charger
             if (this.priseId) {
@@ -278,7 +304,9 @@ export class PaymentComponent implements OnInit, OnDestroy {
       userId: this.currentUser.idUser,
       colisId: this.colis.idColis,
       priseId: this.prise.idPrise,
-      amount: this.colis.tarif,
+      amount: this.totalAmount, // Utiliser le montant total avec frais
+      baseAmount: this.colis.tarif, // Montant de base du colis
+      serviceFees: this.serviceFeesAmount, // Montant des frais de service
       methodId: this.selectedMethod.idMethod,
       returnUrl: `${window.location.origin}/payment/success`,
       cancelUrl: `${window.location.origin}/payment/cancel`,
@@ -295,21 +323,67 @@ export class PaymentComponent implements OnInit, OnDestroy {
       } : {})
     };
     
-    switch (this.selectedMethod.methodName) {
-      case 'PayPal':
-        this.processPaypalPayment(paymentData);
-        break;
-      case 'Stripe':
-        this.processStripePayment(paymentData);
-        break;
-      case 'Orange Money':
-      case 'Mobile Money':
-        this.processMobileMoneyPayment(paymentData);
-        break;
-      default:
-        this.handleError('Méthode de paiement non supportée');
-        this.processing = false;
+   // Utiliser le nouveau service de paiement avec frais
+  this.paymentService.createPaymentWithFees(paymentData)
+  .pipe(
+    takeUntil(this.destroy$),
+    finalize(() => {
+      this.processing = false;
+    })
+  )
+  .subscribe({
+    next: (response) => {
+      // Traitement selon la méthode de paiement (code existant)
+      switch (this.selectedMethod.methodName) {
+        case 'PayPal':
+          // Stocker l'ID du paiement dans localStorage pour reprise éventuelle
+          localStorage.setItem('pendingPaymentId', response.paymentId.toString());
+          
+          // Rediriger vers l'URL de paiement PayPal
+          window.location.href = response.paymentUrl;
+          break;
+        case 'Stripe':
+          if (response.requiresAction) {
+            // Pour 3D Secure, rediriger vers la page de vérification
+            window.location.href = response.actionUrl;
+          } else {
+            // Paiement réussi
+            this.success = true;
+            this.updateStatus(response.paymentId);
+          }
+          break;
+        case 'Orange Money':
+        case 'Mobile Money':
+          if (response.requiresConfirmation) {
+            // Afficher un message indiquant qu'une confirmation est nécessaire
+            this.snackBar.open('Veuillez confirmer le paiement sur votre téléphone', 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom'
+            });
+            
+            // Vérifier le statut du paiement toutes les 5 secondes
+            this.checkPaymentStatus(response.paymentId);
+          } else {
+            // Paiement réussi
+            this.success = true;
+            this.updateStatus(response.paymentId);
+          }
+          break;
+        default:
+          this.snackBar.open('Méthode de paiement non supportée', 'Fermer', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass: ['error-snackbar']
+          });
+      }
+    },
+    error: (error) => {
+      console.error('Erreur lors du traitement du paiement:', error);
+      this.handleError(error.error?.message || 'Erreur lors du traitement du paiement');
     }
+  });
   }
   
   processPaypalPayment(paymentData: any): void {

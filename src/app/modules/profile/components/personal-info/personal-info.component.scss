@@ -1,0 +1,72 @@
+/* src/app/modules/profile/components/personal-info/personal-info.component.scss (modifié) */
+.personal-info-container {
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin: 0 0 8px 0;
+    /* Ajout d'un texte shadow pour améliorer la visibilité sur les fonds sombres */
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+  }
+  
+  p {
+    color: var(--text-color-secondary);
+    margin: 0 0 24px 0;
+    font-size: 0.9rem;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+
+
+  
+.button-enregistrer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--accent-color);
+    color: white;
+    /* Ajout d'une ombre pour plus de contraste */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    
+    mat-spinner {
+      margin: 0;
+    }
+  }
+}
+
+/* Assurer la visibilité des labels de champs */
+::ng-deep .mat-form-field-label {
+  color: var(--text-color) !important;
+  font-weight: 500 !important;
+}
+
+/* Améliorer le contraste des bordures de champs */
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Styles responsifs */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

@@ -13,6 +13,12 @@ const routes: Routes = [
     path: 'auth',
     loadChildren: () => import('./modules/auth/auth.module').then(m => m.AuthModule)
   },
+    // Redirection de /login vers /auth/login pour compatibilité
+    {
+      path: 'login',
+      redirectTo: 'auth/login',
+      pathMatch: 'full'
+    },
   {
     path: 'unauthorized',
     loadComponent: () => import('./shared/components/unauthorized/unauthorized.component').then(c => c.UnauthorizedComponent)

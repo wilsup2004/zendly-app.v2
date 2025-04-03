@@ -1,0 +1,107 @@
+<!-- src/app/modules/admin/config/admin-config.component.html -->
+<div class="admin-config-container">
+  <header class="admin-config-header">
+    <div class="header-title">
+      <h1>Configuration de l'application</h1>
+      <p>Modifiez les paramètres généraux de l'application</p>
+    </div>
+  </header>
+  
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Chargement des paramètres...</p>
+  </div>
+  
+  <!-- Config form -->
+  <div *ngIf="!loading" class="admin-config-content">
+    <mat-card class="config-card">
+      <mat-card-header>
+        <mat-card-title>Paramètres généraux</mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="configForm" (ngSubmit)="saveConfig()">
+          <h3>Frais de service</h3>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Pourcentage des frais de service</mat-label>
+            <input 
+              matInput 
+              type="number" 
+              formControlName="serviceFeesPercentage" 
+              min="0" 
+              max="100" 
+              required>
+            <span matSuffix>%</span>
+            <mat-hint>Ce pourcentage sera ajouté au prix du colis</mat-hint>
+            <mat-error *ngIf="configForm.get('serviceFeesPercentage')?.hasError('required')">
+              Le pourcentage est requis
+            </mat-error>
+            <mat-error *ngIf="configForm.get('serviceFeesPercentage')?.hasError('min') || 
+                            configForm.get('serviceFeesPercentage')?.hasError('max')">
+              Le pourcentage doit être entre 0 et 100
+            </mat-error>
+          </mat-form-field>
+          
+          <div class="fees-example">
+            <p>Exemple: Pour un colis de 100€, le client paiera 
+              <strong>{{ 100 + (configForm.get('serviceFeesPercentage')?.value || 0) }} €</strong> 
+              (dont <strong>{{ configForm.get('serviceFeesPercentage')?.value || 0 }} €</strong> de frais)</p>
+          </div>
+          
+          <h3>Limites des colis</h3>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Poids maximum</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="maxPackageWeight" 
+                min="1" 
+                required>
+              <span matSuffix>kg</span>
+              <mat-error *ngIf="configForm.get('maxPackageWeight')?.hasError('required')">
+                Le poids maximum est requis
+              </mat-error>
+              <mat-error *ngIf="configForm.get('maxPackageWeight')?.hasError('min')">
+                Le poids doit être positif
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Dimensions maximales</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="maxPackageDimensions" 
+                min="1" 
+                required>
+              <span matSuffix>cm</span>
+              <mat-hint>Longueur, largeur ou hauteur maximale</mat-hint>
+              <mat-error *ngIf="configForm.get('maxPackageDimensions')?.hasError('required')">
+                Les dimensions maximales sont requises
+              </mat-error>
+              <mat-error *ngIf="configForm.get('maxPackageDimensions')?.hasError('min')">
+                Les dimensions doivent être positives
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-actions">
+            <button mat-button type="button" (click)="loadConfig()">Annuler</button>
+            <button 
+              mat-raised-button 
+              class="custom-button"
+              type="submit" 
+              [disabled]="configForm.invalid || loading">
+              <span *ngIf="!loading">Enregistrer</span>
+              <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

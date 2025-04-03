@@ -1,0 +1,49 @@
+<!-- src/app/modules/messaging/components/conversation/conversation.component.html -->
+<div class="conversation-container">
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+  
+  <div #messagesList class="messages-list">
+    <ng-container *ngIf="messages.length > 0; else noMessages">
+      <div 
+        *ngFor="let message of messages" 
+        class="message-bubble" 
+        [ngClass]="{'sent': isCurrentUserMessage(message), 'received': !isCurrentUserMessage(message)}"
+      >
+        <div class="message-content">{{ message.message }}</div>
+        <div class="message-timestamp">
+          {{ formatMessageDate(message.horodatage) }}
+          <ng-container *ngIf="isCurrentUserMessage(message)">
+            <mat-icon *ngIf="message.isRead" class="read-status read">done_all</mat-icon>
+            <mat-icon *ngIf="!message.isRead" class="read-status unread">done</mat-icon>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+    
+    <ng-template #noMessages>
+      <div class="no-messages">
+        <mat-icon>chat</mat-icon>
+        <p>Aucun message dans cette conversation. Commencez à échanger !</p>
+      </div>
+    </ng-template>
+  </div>
+  
+  <div class="message-input">
+    <mat-form-field appearance="outline" class="full-width">
+      <input 
+        matInput 
+        placeholder="Tapez votre message..." 
+        [(ngModel)]="newMessage" 
+        (keyup.enter)="sendMessage()"
+      >
+      <button 
+        mat-icon-button 
+        matSuffix 
+        (click)="sendMessage()" 
+        [disabled]="!newMessage.trim()"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+</div>

@@ -7,7 +7,7 @@
     </div>
     
     <div class="header-actions">
-      <button mat-raised-button color="primary" routerLink="/colis/create">
+      <button mat-raised-button class="theme-button next-button" routerLink="/colis/create">
         <mat-icon>add</mat-icon>
         Nouveau colis
       </button>
@@ -55,10 +55,10 @@
     <p *ngIf="activeTab === 'mes-colis'">Vous n'avez pas encore de colis</p>
     <p *ngIf="activeTab === 'mes-prises'">Vous n'avez pas encore de prises en charge</p>
     <p *ngIf="activeTab === 'disponibles'">Aucun colis disponible pour votre recherche</p>
-    <button *ngIf="activeTab === 'mes-colis'" mat-raised-button color="primary" routerLink="/colis/create">
+    <button *ngIf="activeTab === 'mes-colis'" mat-raised-button class="custom-button primary" routerLink="/colis/create">
       Créer un colis
     </button>
-    <button *ngIf="activeTab === 'disponibles'" mat-raised-button color="primary" (click)="filter = { statut: null, villeDepart: null, villeArrivee: null }; loadColisByTab()">
+    <button *ngIf="activeTab === 'disponibles'" mat-raised-button class="custom-button primary" (click)="filter = { statut: null, villeDepart: null, villeArrivee: null }; loadColisByTab()">
       Réinitialiser les filtres
     </button>
   </div>

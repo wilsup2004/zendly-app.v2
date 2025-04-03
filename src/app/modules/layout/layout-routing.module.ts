@@ -22,7 +22,7 @@ const routes: Routes = [
       },
       {
         path: 'profile',
-        loadChildren: () => import('../user/user.module').then(m => m.UserModule),
+        loadChildren: () => import('../profile/profile.module').then(m => m.ProfileModule),
         canActivate: [AuthGuard]
       },
       {
@@ -47,6 +47,11 @@ const routes: Routes = [
       },
       {
         path: 'admin',
+        loadChildren: () => import('../admin/admin.module').then(m => m.AdminModule),
+        canActivate: [AdminGuard]
+      },
+      {
+        path: 'admin/config',
         loadChildren: () => import('../admin/admin.module').then(m => m.AdminModule),
         canActivate: [AdminGuard]
       }

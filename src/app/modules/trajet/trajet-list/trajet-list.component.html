@@ -50,10 +50,10 @@
     <mat-icon>flight</mat-icon>
     <p *ngIf="activeTab === 'mes-trajets'">Vous n'avez pas encore de trajets</p>
     <p *ngIf="activeTab === 'disponibles'">Aucun trajet disponible pour votre recherche</p>
-    <button *ngIf="activeTab === 'mes-trajets'" mat-raised-button color="primary" (click)="createTrajet()">
+    <button *ngIf="activeTab === 'mes-trajets'" mat-raised-button class="custom-button primary" (click)="createTrajet()">
       Déclarer un trajet
     </button>
-    <button *ngIf="activeTab === 'disponibles'" mat-raised-button color="primary" (click)="filter = { statut: null, villeDepart: null, villeArrivee: null, dateMin: null, dateMax: null }; loadTrajetsByTab()">
+    <button *ngIf="activeTab === 'disponibles'" mat-raised-button class="custom-button primary" (click)="filter = { statut: null, villeDepart: null, villeArrivee: null, dateMin: null, dateMax: null }; loadTrajetsByTab()">
       Réinitialiser les filtres
     </button>
   </div>

@@ -1,0 +1,149 @@
+/* Ajoutez ces styles à votre fichier profile.component.scss */
+
+:host {
+  /* Assurez-vous que les styles sont appliqués dans tous les contextes */
+  display: block;
+}
+
+.profile-container {
+  h1 {
+    color: var(--text-color);
+    margin-bottom: 8px;
+  }
+  
+  p {
+    color: var(--text-color-secondary);
+  }
+  
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  min-height: 82vh;
+}
+
+.profile-content {
+  margin-top: 20px;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-card {
+  background-color: var(--card-background);
+  color: var(--text-color);
+  height: fit-content;
+}
+
+.profile-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 16px;
+  
+  .profile-user-info {
+    margin-top: 16px;
+    
+    h2 {
+      margin: 0;
+      color: var(--text-color);
+    }
+    
+    p {
+      margin: 4px 0;
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+ 
+
+.user-stats {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-top: 16px;
+  
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+      
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--text-color);
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+.profile-edit-card {
+  background-color: var(--card-background);
+  color: var(--text-color);
+  
+  /* Styles spécifiques pour les onglets */
+  ::ng-deep .mat-tab-label {
+    color: var(--text-color) !important;
+    opacity: 0.7;
+    
+    &.mat-tab-label-active {
+      opacity: 1;
+    }
+  }
+  
+  ::ng-deep .mat-tab-header {
+    border-bottom-color: var(--border-color);
+  }
+  
+  ::ng-deep .mat-tab-group.mat-primary .mat-ink-bar {
+    background-color: var(--accent-color);
+  }
+  
+  .tab-content {
+    padding: 24px;
+  }
+}
+
+/* Styles pour assurer la visibilité des libellés d'onglets */
+::ng-deep .mat-tab-labels {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px 4px 0 0;
+}
+
+/* Styles pour le libellé "Informations personnelles" */
+::ng-deep .mat-tab-label-content {
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+}
+
+.my-16 {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+/* Styles pour l'état de chargement */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  
+  p {
+    margin-top: 16px;
+    color: var(--text-color-secondary);
+  }
+}

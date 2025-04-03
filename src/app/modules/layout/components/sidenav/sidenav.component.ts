@@ -83,6 +83,11 @@ export class SidenavComponent implements OnInit {
         label: 'Administration',
         icon: 'admin_panel_settings',
         route: '/admin'
+      },
+      {
+        label: 'Configuration générale',
+        icon: 'settings',
+        route: '/admin/config'
       });
     }
   }

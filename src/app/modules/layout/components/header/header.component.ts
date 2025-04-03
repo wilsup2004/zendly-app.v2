@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ThemeService, Theme } from '../../../../core/services/theme.service';
 import { TranslationService, Language } from '../../../../core/services/translation.service';
+import { UnreadMessagesService } from '../../../../core/services/unread-messages.service';
 import { User } from '../../../../core/models/user.model';
 
 @Component({
@@ -26,7 +27,8 @@ export class HeaderComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private themeService: ThemeService,
-    private translationService: TranslationService
+    private translationService: TranslationService,
+    private unreadMessagesService: UnreadMessagesService
   ) {
     this.currentUser$ = this.authService.currentUser$;
     this.activeTheme = this.themeService.getActiveTheme();
@@ -44,6 +46,11 @@ export class HeaderComponent implements OnInit {
     // S'abonner aux changements de langue
     this.translationService.currentLanguage$.subscribe(language => {
       this.currentLanguage = language;
+    });
+    
+    // S'abonner au compteur de messages non lus
+    this.unreadMessagesService.unreadCount$.subscribe(count => {
+      this.unreadMessagesCount = count;
     });
   }
 

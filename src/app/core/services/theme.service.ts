@@ -2,142 +2,341 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+export type ThemeOption = 'light-theme' | 'dark-theme' | 'cyber-neon-theme' | 'sugar-candy-theme' | 'emerald-ocean-theme' | 'cosmic-purple-theme';
+
 export interface Theme {
   name: string;
-  className: string;
-  isDark: boolean;
-  properties: {
-    [key: string]: string;
-  };
+  className: ThemeOption;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThemeService {
-  // Liste des thèmes disponibles
   private themes: Theme[] = [
-    {
-      name: 'Cyber Neon',
-      className: 'cyber-neon-theme',
-      isDark: true,
-      properties: {
-        '--primary-color': '#0BC5EA',
-        '--primary-color-gradient': 'linear-gradient(to right, #0BC5EA, #2B6CB0)',
-        '--background-color': '#0A0E17',
-        '--background-gradient': 'linear-gradient(to bottom right, #111827, #0F2942, #111827)',
-        '--card-background': 'rgba(17, 25, 40, 0.8)',
-        '--text-color': '#ffffff',
-        '--text-color-secondary': '#A0AEC0',
-        '--accent-color': 'rgb(6, 182, 212)',
-        '--border-color': 'rgba(6, 182, 212, 0.5)',
-        '--glow-effect': '0 0 15px rgba(6, 182, 212, 0.5)',
-        '--hover-glow': '0 0 20px rgba(6, 182, 212, 0.7)',
-        '--translucent-bg': 'rgba(255, 255, 255, 0.05)'
-      }
-    },
-    {
-      name: 'Sugar Candy',
-      className: 'sugar-candy-theme',
-      isDark: false,
-      properties: {
-        '--primary-color': '#D53F8C',
-        '--primary-color-gradient': 'linear-gradient(to right, #D53F8C, #B83280)',
-        '--background-color': '#FFF5F7',
-        '--background-gradient': 'linear-gradient(to bottom right, #FFF5F7, #FFFFFF, #EBF8FF)',
-        '--card-background': 'rgba(255, 255, 255, 0.8)',
-        '--text-color': '#2D3748',
-        '--text-color-secondary': '#718096',
-        '--accent-color': '#D53F8C',
-        '--border-color': '#FED7E2',
-        '--glow-effect': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        '--hover-glow': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        '--translucent-bg': 'rgba(255, 255, 255, 0.5)'
-      }
-    },
-    {
-      name: 'Emerald Ocean',
-      className: 'emerald-ocean-theme',
-      isDark: true,
-      properties: {
-        '--primary-color': '#10B981',
-        '--primary-color-gradient': 'linear-gradient(to right, #10B981, #0D9488)',
-        '--background-color': '#134E4A',
-        '--background-gradient': 'linear-gradient(to bottom right, #134E4A, #115E59, #134E4A)',
-        '--card-background': 'rgba(20, 83, 45, 0.3)',
-        '--text-color': '#ffffff',
-        '--text-color-secondary': '#A7F3D0',
-        '--accent-color': '#10B981',
-        '--border-color': 'rgba(20, 184, 166, 0.5)',
-        '--glow-effect': '0 0 15px rgba(20, 184, 166, 0.5)',
-        '--hover-glow': '0 0 20px rgba(20, 184, 166, 0.7)',
-        '--translucent-bg': 'rgba(255, 255, 255, 0.05)'
-      }
-    },
-    {
-      name: 'Cosmic Purple',
-      className: 'cosmic-purple-theme',
-      isDark: true,
-      properties: {
-        '--primary-color': '#8B5CF6',
-        '--primary-color-gradient': 'linear-gradient(to right, #8B5CF6, #D946EF)',
-        '--background-color': '#0F172A',
-        '--background-gradient': 'linear-gradient(to bottom right, #0F172A, #2E1065, #0F172A)',
-        '--card-background': 'rgba(30, 41, 59, 0.5)',
-        '--text-color': '#ffffff',
-        '--text-color-secondary': '#CBD5E1',
-        '--accent-color': '#A855F7',
-        '--border-color': 'rgba(168, 85, 247, 0.5)',
-        '--glow-effect': '0 0 15px rgba(168, 85, 247, 0.4)',
-        '--hover-glow': '0 0 20px rgba(168, 85, 247, 0.6)',
-        '--translucent-bg': 'rgba(255, 255, 255, 0.05)'
-      }
-    }
+    { name: 'Clair', className: 'light-theme' },
+    { name: 'Sombre', className: 'dark-theme' },
+    { name: 'Cyber Néon', className: 'cyber-neon-theme' },
+    { name: 'Sugar Candy', className: 'sugar-candy-theme' },
+    { name: 'Océan Émeraude', className: 'emerald-ocean-theme' },
+    { name: 'Violet Cosmique', className: 'cosmic-purple-theme' }
   ];
-
-  // Thème par défaut
-  private activeTheme = new BehaviorSubject<Theme>(this.themes[0]);
-  activeTheme$ = this.activeTheme.asObservable();
+  
+  private activeThemeSubject = new BehaviorSubject<Theme>(this.getDefaultTheme());
+  activeTheme$ = this.activeThemeSubject.asObservable();
 
   constructor() {
-    // Récupérer le thème sauvegardé dans le localStorage
-    const savedTheme = localStorage.getItem('theme');
+    // Initialiser le thème au démarrage
+    const savedTheme = this.getSavedTheme();
     if (savedTheme) {
-      const theme = this.themes.find(t => t.name === savedTheme);
-      if (theme) {
-        this.setActiveTheme(theme);
-      }
-    }
-  }
-
-  // Obtenir tous les thèmes disponibles
-  getThemes(): Theme[] {
-    return this.themes;
-  }
-
-  // Obtenir le thème actif
-  getActiveTheme(): Theme {
-    return this.activeTheme.value;
-  }
-
-  // Définir le thème actif
-  setActiveTheme(theme: Theme): void {
-    // Sauvegarder le thème dans le localStorage
-    localStorage.setItem('theme', theme.name);
-    
-    // Mettre à jour les propriétés CSS
-    Object.keys(theme.properties).forEach(property => {
-      document.documentElement.style.setProperty(property, theme.properties[property]);
-    });
-    
-    // Si c'est un thème sombre, ajouter la classe dark-theme au body
-    if (theme.isDark) {
-      document.body.classList.add('dark-theme');
+      this.setActiveTheme(savedTheme);
     } else {
-      document.body.classList.remove('dark-theme');
+      // Si aucun thème n'est sauvegardé, appliquer les styles pour le thème par défaut
+      this.applyThemeSpecificAdjustments('light-theme');
+      document.body.setAttribute('data-theme', 'light-theme');
+    }
+  }
+
+  getThemes(): Theme[] {
+    return [...this.themes];
+  }
+
+  getActiveTheme(): Theme {
+    return this.activeThemeSubject.value;
+  }
+
+  setActiveTheme(theme: Theme): void {
+    if (!this.isValidTheme(theme.className)) {
+      theme = this.getDefaultTheme();
     }
     
-    // Mettre à jour le thème actif
-    this.activeTheme.next(theme);
+    // Supprimer toutes les classes de thème du body
+    document.body.classList.remove('dark-theme', 'cyber-neon-theme', 'sugar-candy-theme', 'emerald-ocean-theme', 'cosmic-purple-theme');
+    
+    // Appliquer la nouvelle classe de thème si ce n'est pas le thème clair (qui est le défaut)
+    if (theme.className !== 'light-theme') {
+      document.body.classList.add(theme.className);
+    }
+    
+    // Mettre à jour localStorage et le sujet BehaviorSubject
+    localStorage.setItem('theme', theme.className);
+    this.activeThemeSubject.next(theme);
+    
+    // Ajouter un attribut data-theme pour faciliter le ciblage CSS
+    document.body.setAttribute('data-theme', theme.className);
+    
+    // Appliquer des ajustements spécifiques au thème
+    this.applyThemeSpecificAdjustments(theme.className);
+  }
+
+  private getSavedTheme(): Theme | null {
+    const savedThemeClass = localStorage.getItem('theme') as ThemeOption;
+    if (savedThemeClass && this.isValidTheme(savedThemeClass)) {
+      const foundTheme = this.themes.find(theme => theme.className === savedThemeClass);
+      return foundTheme || null;
+    }
+    return null;
+  }
+
+  private getDefaultTheme(): Theme {
+    return { name: 'Clair', className: 'light-theme' };
+  }
+
+  private isValidTheme(theme: string): theme is ThemeOption {
+    return ['light-theme', 'dark-theme', 'cyber-neon-theme', 'sugar-candy-theme', 'emerald-ocean-theme', 'cosmic-purple-theme'].includes(theme);
+  }
+  
+  private applyThemeSpecificAdjustments(themeClass: ThemeOption): void {
+    // Appliquer des ajustements spécifiques selon le thème
+    const htmlRoot = document.documentElement;
+    
+    // Réinitialiser les propriétés personnalisées
+    htmlRoot.style.removeProperty('--tab-label-shadow');
+    htmlRoot.style.removeProperty('--text-contrast-boost');
+    htmlRoot.style.removeProperty('--sidenav-text-color');
+    htmlRoot.style.removeProperty('--sidenav-active-color');
+    htmlRoot.style.removeProperty('--form-label-color');
+    htmlRoot.style.removeProperty('--form-input-color');
+    htmlRoot.style.removeProperty('--profile-text-color');
+    htmlRoot.style.removeProperty('--profile-text-shadow');
+    
+    // Appliquer des ajustements selon le thème
+    switch (themeClass) {
+      case 'dark-theme':
+        // Augmenter le contraste pour le thème sombre
+        htmlRoot.style.setProperty('--tab-label-shadow', '0 0 3px rgba(0, 0, 0, 0.7)');
+        htmlRoot.style.setProperty('--text-contrast-boost', '0 0 2px rgba(0, 0, 0, 0.8)');
+        // Couleur du texte et des icônes du sidenav
+        htmlRoot.style.setProperty('--sidenav-text-color', '#ffffff');
+        htmlRoot.style.setProperty('--sidenav-active-color', '#ff4081'); // Rose
+        // Couleurs pour les formulaires et le profil
+        htmlRoot.style.setProperty('--form-label-color', '#ffffff');
+        htmlRoot.style.setProperty('--form-input-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-shadow', '0 0 3px rgba(0, 0, 0, 0.7)');
+        break;
+        
+      case 'cyber-neon-theme':
+        // Ajustements pour le thème Cyber Neon
+        htmlRoot.style.setProperty('--tab-label-shadow', '0 0 3px rgba(0, 0, 0, 0.7)');
+        htmlRoot.style.setProperty('--text-contrast-boost', '0 0 2px rgba(0, 0, 0, 0.8)');
+        // Couleur du texte et des icônes neon
+        htmlRoot.style.setProperty('--sidenav-text-color', '#A0AEC0');
+        htmlRoot.style.setProperty('--sidenav-active-color', 'rgb(6, 182, 212)'); // Cyan
+        htmlRoot.style.setProperty('--form-label-color', '#ffffff');
+        htmlRoot.style.setProperty('--form-input-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-shadow', '0 0 4px rgba(6, 182, 212, 0.7)');
+        break;
+        
+      case 'emerald-ocean-theme':
+        // Ajustements pour le thème Océan Émeraude
+        htmlRoot.style.setProperty('--tab-label-shadow', '0 0 3px rgba(0, 0, 0, 0.7)');
+        htmlRoot.style.setProperty('--text-contrast-boost', '0 0 2px rgba(0, 0, 0, 0.8)');
+        // Couleur du texte et des icônes émeraude
+        htmlRoot.style.setProperty('--sidenav-text-color', '#A7F3D0');
+        htmlRoot.style.setProperty('--sidenav-active-color', '#10B981'); // Vert
+        htmlRoot.style.setProperty('--form-label-color', '#ffffff');
+        htmlRoot.style.setProperty('--form-input-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-shadow', '0 0 4px rgba(20, 184, 166, 0.7)');
+        break;
+        
+      case 'cosmic-purple-theme':
+        // Ajustements pour le thème Violet Cosmique
+        htmlRoot.style.setProperty('--tab-label-shadow', '0 0 3px rgba(0, 0, 0, 0.7)');
+        htmlRoot.style.setProperty('--text-contrast-boost', '0 0 2px rgba(0, 0, 0, 0.8)');
+        // Couleur du texte et des icônes violet cosmique
+        htmlRoot.style.setProperty('--sidenav-text-color', '#CBD5E1');
+        htmlRoot.style.setProperty('--sidenav-active-color', '#A855F7'); // Violet
+        htmlRoot.style.setProperty('--form-label-color', '#ffffff');
+        htmlRoot.style.setProperty('--form-input-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-color', '#ffffff');
+        htmlRoot.style.setProperty('--profile-text-shadow', '0 0 4px rgba(168, 85, 247, 0.7)');
+        break;
+        
+      case 'sugar-candy-theme':
+        // Ajustements pour le thème Sugar Candy
+        // Couleur du texte et des icônes sugar candy
+        htmlRoot.style.setProperty('--sidenav-text-color', '#718096');
+        htmlRoot.style.setProperty('--sidenav-active-color', '#D53F8C'); // Rose
+        htmlRoot.style.setProperty('--form-label-color', '#2D3748');
+        htmlRoot.style.setProperty('--form-input-color', '#2D3748');
+        htmlRoot.style.setProperty('--profile-text-color', '#2D3748');
+        htmlRoot.style.setProperty('--profile-text-shadow', '0 0 3px rgba(255, 255, 255, 0.7)');
+        break;
+        
+      default:
+        // Thème clair par défaut
+        htmlRoot.style.setProperty('--sidenav-text-color', '#666666');
+        htmlRoot.style.setProperty('--sidenav-active-color', '#3f51b5'); // Bleu
+        htmlRoot.style.setProperty('--form-label-color', '#333333');
+        htmlRoot.style.setProperty('--form-input-color', '#333333');
+        htmlRoot.style.setProperty('--profile-text-color', '#333333');
+        htmlRoot.style.setProperty('--profile-text-shadow', 'none');
+        break;
+    }
+    
+    // Ajouter les balises de style pour appliquer les couleurs
+    this.updateSidenavStyles();
+    this.updateProfileStyles();
+  }
+  
+  private updateSidenavStyles(): void {
+    // Supprimer l'ancien style s'il existe
+    const existingStyle = document.getElementById('sidenav-custom-style');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+    
+    // Créer une balise style pour assurer que les icônes et les textes du sidenav ont la bonne couleur
+    const styleElement = document.createElement('style');
+    styleElement.id = 'sidenav-custom-style';
+    styleElement.textContent = `
+      /* Style pour le texte et les icônes du sidenav */
+      .sidenav-container .mat-mdc-list-item .mdc-list-item__primary-text,
+      .sidenav-container .mdc-list-item__start,
+      .sidenav-container .mat-icon,
+      .sidenav-container .mat-nav-list .mat-list-item,
+      .sidenav-container .mat-mdc-list .mat-mdc-list-item {
+        color: var(--sidenav-text-color) !important;
+      }
+      
+      /* Style pour les éléments actifs du sidenav */
+      .sidenav-container .active-link .mdc-list-item__primary-text,
+      .sidenav-container .active-link .mdc-list-item__start,
+      .sidenav-container .active-link .mat-icon {
+        color: var(--sidenav-active-color) !important;
+        font-weight: 500;
+        text-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+      }
+      
+      /* Ajout d'une bordure latérale pour les éléments actifs */
+      .sidenav-container .active-link {
+        border-left: 3px solid var(--sidenav-active-color) !important;
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+      
+      /* Effet de survol pour les éléments du sidenav */
+      .sidenav-container .mat-mdc-list-item:hover:not(.active-link) {
+        background-color: rgba(0, 0, 0, 0.03);
+      }
+      
+      /* Transition fluide pour les changements d'état */
+      .sidenav-container .mat-mdc-list-item,
+      .sidenav-container .mat-mdc-list-item .mdc-list-item__primary-text,
+      .sidenav-container .mat-mdc-list-item .mdc-list-item__start,
+      .sidenav-container .mat-mdc-list-item .mat-icon {
+        transition: all 0.3s ease;
+      }
+    `;
+    
+    // Ajouter le style au head du document
+    document.head.appendChild(styleElement);
+  }
+  
+  private updateProfileStyles(): void {
+    // Supprimer l'ancien style s'il existe
+    const existingStyle = document.getElementById('profile-custom-style');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+    
+    // Créer une balise style pour assurer que tous les textes du profil sont visibles
+    const styleElement = document.createElement('style');
+    styleElement.id = 'profile-custom-style';
+    styleElement.textContent = `
+      /* Styles généraux pour les textes dans le profil */
+      .profile-container h1,
+      .profile-container h2,
+      .profile-container h3,
+      .personal-info-container h3,
+      .security-container h3,
+      .profile-user-info h2,
+      .form-actions button span,
+      .stat-value,
+      .stat-label {
+        color: var(--profile-text-color) !important;
+        text-shadow: var(--profile-text-shadow) !important;
+      }
+      
+      /* Styles pour le contenu des formulaires */
+      .mat-mdc-form-field-infix,
+      .mat-mdc-select-value-text {
+        color: var(--form-input-color) !important;
+      }
+      
+      /* Style pour les label des formulaires */
+      .mat-mdc-form-field-label,
+      .mat-mdc-form-field-required-marker {
+        color: var(--form-label-color) !important;
+      }
+      
+      /* Style pour les zones de texte des formulaires Material */
+      .mat-mdc-text-field-wrapper input,
+      .mat-mdc-text-field-wrapper textarea,
+      .mat-mdc-select-value {
+        color: var(--form-input-color) !important;
+      }
+      
+      /* Styles pour les onglets - même style que le sidenav */
+      .mat-tab-label {
+        opacity: 1 !important;
+      }
+      
+      .mat-tab-label-content {
+        color: var(--sidenav-text-color) !important;
+        font-weight: normal;
+        transition: all 0.3s ease;
+      }
+      
+      .mat-tab-label-active .mat-tab-label-content {
+        color: var(--sidenav-active-color) !important;
+        font-weight: 500;
+      }
+      
+      /* Style personnalisé pour les onglets actifs */
+      .mat-tab-label-active::after {
+        background-color: var(--sidenav-active-color) !important;
+        box-shadow: 0 0 4px var(--sidenav-active-color);
+      }
+      
+      /* Styles pour les boutons de visibilité des mots de passe */
+      .mat-form-field-suffix .mat-icon,
+      .mat-form-field-suffix .mat-icon-button {
+        color: var(--form-label-color) !important;
+      }
+      
+      /* Style pour les libellés dans les champs de mot de passe */
+      .mat-mdc-floating-label {
+        color: var(--form-label-color) !important;
+      }
+      
+      /* Style pour les bordures des champs */
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--form-label-color) !important;
+        opacity: 0.7;
+      }
+      
+      /* Style pour les bordures des champs quand focus */
+      .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+      .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+      .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+        border-color: var(--sidenav-active-color) !important;
+        opacity: 1;
+      }
+      
+      /* Augmentation du contraste pour les boutons */
+      .profile-container .mat-raised-button.mat-primary,
+      .profile-container .mat-flat-button.mat-primary {
+        background-color: var(--sidenav-active-color) !important;
+        color: white !important;
+      }
+    `;
+    
+    // Ajouter le style au head du document
+    document.head.appendChild(styleElement);
   }
 }

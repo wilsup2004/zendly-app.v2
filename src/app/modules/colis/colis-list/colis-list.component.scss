@@ -1,6 +1,10 @@
 /* src/app/modules/colis/colis-list/colis-list.component.scss */
 .colis-list-container {
   padding: 24px;
+  min-height: 80vh;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .colis-list-header {
@@ -9,6 +13,17 @@
   align-items: center;
   margin-bottom: 24px;
 }
+
+.theme-button.next-button {
+  background-color: var(--primary-color);
+  color: white;
+  
+  &:hover:not([disabled]) {
+    background-color: var(--accent-color);
+    box-shadow: var(--hover-glow);
+  }
+}
+
 
 .header-title {
   h1 {
@@ -128,6 +143,19 @@
     margin-bottom: 24px;
     color: var(--text-color-secondary);
     font-size: 1.1rem;
+  }
+
+   button {
+  
+    color: var(--text-color)!important;
+  
+    &.primary {
+      background-color: var(--primary-color) !important;
+    }
+    &.accent {
+      background-color: var(--accent-color) !important;
+    }
+  
   }
 }
 

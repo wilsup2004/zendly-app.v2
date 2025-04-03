@@ -29,12 +29,33 @@
         </mat-form-field>
       </div>
       
+      <!-- Champ pour le pseudo -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Pseudo</mat-label>
+        <input matInput formControlName="pseudo" placeholder="john_doe123" required>
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-hint *ngIf="checkingPseudo">Vérification de la disponibilité...</mat-hint>
+        <mat-hint *ngIf="!checkingPseudo && pseudoAvailable" class="available-text">Ce pseudo est disponible</mat-hint>
+        <mat-error *ngIf="f['pseudo'].errors?.['required']">Le pseudo est requis</mat-error>
+        <mat-error *ngIf="f['pseudo'].errors?.['minlength']">Le pseudo doit contenir au moins 3 caractères</mat-error>
+        <mat-error *ngIf="f['pseudo'].errors?.['pattern']">Le pseudo ne peut contenir que des lettres, chiffres et tirets bas</mat-error>
+        <mat-error *ngIf="f['pseudo'].errors?.['pseudoTaken']">Ce pseudo est déjà pris</mat-error>
+      </mat-form-field>
+      
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Email</mat-label>
         <input matInput formControlName="email" type="email" placeholder="exemple@email.com" required>
         <mat-icon matSuffix>email</mat-icon>
         <mat-error *ngIf="f['email'].errors?.['required']">L'email est requis</mat-error>
         <mat-error *ngIf="f['email'].errors?.['email']">Veuillez entrer un email valide</mat-error>
+      </mat-form-field>
+      
+      <!-- Ajout du champ téléphone -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Téléphone</mat-label>
+        <input matInput formControlName="telephone" placeholder="Ex: 0612345678">
+        <mat-icon matSuffix>phone</mat-icon>
+        <mat-error *ngIf="f['telephone'].errors?.['pattern']">Veuillez entrer un numéro de téléphone valide (10 chiffres)</mat-error>
       </mat-form-field>
       
       <mat-form-field appearance="outline" class="full-width">

@@ -13,6 +13,8 @@ body {
   color: var(--text-color, #333);
 }
 
+
+
 /* Application des variables de thème */
 :root {
   /* Variables par défaut (thème clair) */
@@ -28,32 +30,66 @@ body {
   --glow-effect: 0 2px 10px rgba(0, 0, 0, 0.05);
   --hover-glow: 0 4px 15px rgba(0, 0, 0, 0.1);
   --translucent-bg: rgba(0, 0, 0, 0.03);
+
+  /* Nouvelles variables pour les éléments de formulaire */
+  --input-text-color: #333333;
+  --label-text-color: #666666;
+  --form-field-border: #e0e0e0;
+  --form-field-bg: transparent;
+  --checkbox-label-color: #333333;
+  --sidenav-active-color:#ff4081;
+
 }
 
 /* Thème sombre appliqué au body */
 body.dark-theme {
-  --background-color: #121212;
-  --card-background: #1e1e1e;
-  --text-color: #ffffff;
-  --text-color-secondary: #aaaaaa;
-  --border-color: #333333;
-  --translucent-bg: rgba(255, 255, 255, 0.05);
+  --primary-color: #e69728;
+  --primary-color-gradient: linear-gradient(to right, #FFB347, #FF7F50);
+  --background-color: #181818;
+  --background-gradient: linear-gradient(to bottom right, #181818, #2A2A2A, #181818);
+  --card-background: #202020;
+
+  --text-color: #F5F5DC;
+  --text-color-secondary: #69695f;
+
+  --accent-color: #FF7F50;
+  --border-color: rgba(255, 183, 71, 0.2);
+  --glow-effect: 0 0 10px rgba(255, 183, 71, 0.3);
+  --hover-glow: 0 0 16px rgba(255, 183, 71, 0.5);
+  --translucent-bg: rgba(255, 183, 71, 0.05);
+
+  --input-text-color: #FFFFFF;
+  --label-text-color: #FFB347;
+  --form-field-border: rgba(255, 183, 71, 0.3);
+  --form-field-bg: #2A2A2A;
+  --checkbox-label-color: #FFFFFF;
+  --sidenav-active-color:#FF7F50;
 }
 
 /* Classes pour les thèmes spécifiques */
 .cyber-neon-theme {
-  --primary-color: #0BC5EA;
-  --primary-color-gradient: linear-gradient(to right, #0BC5EA, #2B6CB0);
+
+  --primary-color: #2d69a8;
+  --primary-color-gradient: linear-gradient(to right, #295a8f #1ca8c4);
   --background-color: #0A0E17;
   --background-gradient: linear-gradient(to bottom right, #111827, #0F2942, #111827);
   --card-background: rgba(17, 25, 40, 0.8);
   --text-color: #ffffff;
   --text-color-secondary: #A0AEC0;
-  --accent-color: rgb(6, 182, 212);
+  --accent-color: rgb(13, 165, 192);
   --border-color: rgba(6, 182, 212, 0.5);
   --glow-effect: 0 0 15px rgba(6, 182, 212, 0.5);
   --hover-glow: 0 0 20px rgba(6, 182, 212, 0.7);
   --translucent-bg: rgba(255, 255, 255, 0.05);
+
+  /* Thème Cyber Neon pour les formulaires */
+  --input-text-color: #ffffff;
+  --label-text-color: #A0AEC0;
+  --form-field-border: rgba(6, 182, 212, 0.5);
+  --form-field-bg: rgba(6, 182, 212, 0.1);
+  --checkbox-label-color: #ffffff;
+  --sidenav-active-color:rgb(13, 165, 192);
+
 }
 
 .sugar-candy-theme {
@@ -69,6 +105,15 @@ body.dark-theme {
   --glow-effect: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --hover-glow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --translucent-bg: rgba(255, 255, 255, 0.5);
+
+   /* Thème Sugar Candy pour les formulaires */
+   --input-text-color: #2D3748;
+   --label-text-color: #718096;
+   --form-field-border: #FED7E2;
+   --form-field-bg: rgba(253, 242, 248, 0.5);
+   --checkbox-label-color: #2D3748;
+   --sidenav-active-color:#D53F8C;
+
 }
 
 .emerald-ocean-theme {
@@ -76,14 +121,23 @@ body.dark-theme {
   --primary-color-gradient: linear-gradient(to right, #10B981, #0D9488);
   --background-color: #134E4A;
   --background-gradient: linear-gradient(to bottom right, #134E4A, #115E59, #134E4A);
-  --card-background: rgba(20, 83, 45, 0.3);
+  --card-background: #202020;
   --text-color: #ffffff;
-  --text-color-secondary: #A7F3D0;
+  --text-color-secondary: #91969b;
   --accent-color: #10B981;
   --border-color: rgba(20, 184, 166, 0.5);
   --glow-effect: 0 0 15px rgba(20, 184, 166, 0.5);
   --hover-glow: 0 0 20px rgba(20, 184, 166, 0.7);
   --translucent-bg: rgba(255, 255, 255, 0.05);
+
+   /* Thème Emerald Ocean pour les formulaires */
+   --input-text-color: #ffffff;
+   --label-text-color: #A7F3D0;
+   --form-field-border: rgba(20, 184, 166, 0.5);
+   --form-field-bg: rgba(20, 184, 166, 0.1);
+   --checkbox-label-color: #ffffff;
+   --sidenav-active-color:#10B981;
+
 }
 
 .cosmic-purple-theme {
@@ -91,7 +145,7 @@ body.dark-theme {
   --primary-color-gradient: linear-gradient(to right, #8B5CF6, #D946EF);
   --background-color: #0F172A;
   --background-gradient: linear-gradient(to bottom right, #0F172A, #2E1065, #0F172A);
-  --card-background: rgba(30, 41, 59, 0.5);
+  --card-background: rgba(30, 41, 59, 0.5); 
   --text-color: #ffffff;
   --text-color-secondary: #CBD5E1;
   --accent-color: #A855F7;
@@ -99,7 +153,456 @@ body.dark-theme {
   --glow-effect: 0 0 15px rgba(168, 85, 247, 0.4);
   --hover-glow: 0 0 20px rgba(168, 85, 247, 0.6);
   --translucent-bg: rgba(255, 255, 255, 0.05);
+  
+   /* Thème Cosmic Purple pour les formulaires */
+   --input-text-color: #ffffff;
+   --label-text-color: #CBD5E1;
+   --form-field-border: rgba(168, 85, 247, 0.5);
+   --form-field-bg: rgba(168, 85, 247, 0.1);
+   --checkbox-label-color: #ffffff;
+   --sidenav-active-color:#A855F7;
+
+   
 }
+
+/* Application des styles aux composants Angular Material */
+body, 
+body.dark-theme,
+.cyber-neon-theme,
+.sugar-candy-theme,
+.emerald-ocean-theme,
+.cosmic-purple-theme {
+  /* Styles communs qui utilisent les variables de thème */
+  
+  /* Styles pour mat-card */
+  .mat-card {
+    background-color: var(--card-background);
+    color: var(--text-color);
+  }
+  
+  .mat-card-title {
+    color: var(--text-color);
+  }
+  
+  .mat-card-subtitle {
+    color: var(--text-color-secondary);
+  }
+  
+  /* Styles pour mat-form-field */
+  .mat-form-field {
+    .mat-form-field-label {
+      color: var(--label-text-color);
+    }
+    
+    .mat-input-element {
+      color: var(--input-text-color);
+    }
+    
+    .mat-form-field-underline {
+      background-color: var(--form-field-border);
+    }
+    
+    .mat-form-field-ripple {
+      background-color: var(--primary-color);
+    }
+
+    .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
+      color: var(--text-color)!important;
+    }
+
+  }
+
+  .mat-mdc-form-field {
+    input, textarea {
+      color: var(--text-color)!important;
+    }
+
+  
+  }
+  
+ 
+  mat-form-field .mdc-floating-label {
+    color: var(--text-color) !important;
+  }
+
+  mat-select .mat-mdc-select-value {
+    color: var(--text-color) !important;
+  }
+
+  
+  /* Pour appearance="outline" */
+  .mat-form-field-appearance-outline {
+    .mat-form-field-outline {
+      color: var(--form-field-border);
+    }
+    
+    .mat-form-field-outline-thick {
+      color: var(--primary-color);
+    }
+    
+    .mat-form-field-flex {
+      background-color: var(--form-field-bg);
+    }
+  }
+  
+  /* Pour appearance="fill" */
+  .mat-form-field-appearance-fill {
+    .mat-form-field-flex {
+      background-color: var(--form-field-bg);
+    }
+  }
+  
+  /* Styles pour mat-checkbox */
+  .mat-mdc-checkbox .mdc-form-field label {
+    color: var(--text-color) !important;
+  }
+
+  .mat-mdc-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__background {
+    background-color: var(--accent-color) !important;// couleur de fond quand c’est coché
+    border-color: var(--accent-color) !important;    // contour aussi si nécessaire --accent-color
+  }
+
+  .mat-mdc-checkbox .mdc-checkbox__background {
+    border-color: var(--text-color)!important;
+  }
+
+  /* Styles pour les boutons */
+  .mat-button, .mat-raised-button, .mat-flat-button, .mat-stroked-button {
+    &.mat-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+  }
+  
+  /* Styles pour les items du sidenav list */
+  .mat-mdc-list-item .mdc-list-item__primary-text {
+    color:var(--text-color);
+  }
+
+  .mdc-list-item__start {
+    color:var(--text-color);
+  }
+  
+  /* Liens et textes personnalisés */
+  .forgot-password {
+    color: var(--primary-color);
+  }
+  
+  .register-link {
+    color: var(--text-color-secondary);
+    
+    a {
+      color: var(--primary-color);
+    }
+  }
+
+    /* Pour s'assurer que les contours des champs sont visibles */
+    .mat-form-field-appearance-outline .mat-form-field-outline {
+      color: var(--text-color) !important;
+    }
+    
+    /* Pour les labels des champs, les placeholders et le texte saisi */
+    .mat-form-field-label,
+    .mat-input-element::placeholder,
+    .mat-select-value-text {
+      color: var(--text-color) !important;
+    }
+    
+    /* Pour les icônes dans les champs */
+    .mat-form-field .mat-icon {
+      color: var(--text-color) !important;
+    }
+    
+    /* Pour les textes des étapes dans le stepper */
+    .mat-step-label, .mat-step-text-label {
+      color: var(--text-color)!important;
+    }
+    
+    /* Pour les libellés et descriptions des champs */
+    mat-label, mat-hint {
+      color: var(--text-color)!important;
+    }
+
+
+   /* Pour les bordures des champs de formulaire Material Design */
+   .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mdc-notched-outline__leading,
+   .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mdc-notched-outline__notch,
+   .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mdc-notched-outline__trailing {
+     border-color: var(--text-color) !important;
+   }
+   
+   /* Pour assurer que le texte des entrées est blanc */
+   .mat-mdc-input-element {
+     color: var(--text-color)!important;
+   }
+   
+   /* Pour les étiquettes flottantes */
+   .mdc-floating-label {
+     color: var(--text-color) !important;
+   }
+   
+   /* Pour les libellés et textes dans le processus d'étapes */
+   .mat-stepper-horizontal-line, .mat-stepper-label-position-bottom .mat-horizontal-stepper-header::after,
+   .mat-stepper-label-position-bottom .mat-horizontal-stepper-header::before {
+     border-top-color: rgba(255, 255, 255, 0.5) !important;
+   }
+
+  
+   ::-webkit-input-placeholder {
+     color: var(--text-color-secondary) !important; 
+   }
+
+   /* Pour les boutons stepper */
+  .mat-button.mat-stepper-next,
+  .mat-button.mat-stepper-previous,
+  button[matStepperNext],
+  button[matStepperPrevious] {
+    color: var(--text-color) !important;
+  }
+  
+  button.mat-button {
+   // background-color: transparent; // Par défaut, il est transparent
+   color: var(--text-color) !important; 
+  }
+ 
+.mat-datepicker-toggle,
+.mat-datepicker-toggle-default-icon,
+.mat-datepicker-toggle .mat-icon {
+  color: var(--text-color, #ffffff) !important;
+}
+
+
+}
+
+/* Styles pour les onglets de Material et les champs de formulaire */
+body, 
+body.dark-theme,
+.cyber-neon-theme,
+.sugar-candy-theme,
+.emerald-ocean-theme,
+.cosmic-purple-theme {
+  /* Styles spécifiques pour les onglets */
+  .mat-tab-label, .mat-tab-link {
+    color: var(--text-color) !important;
+    opacity: 0.8;
+  }
+  
+  .mat-tab-label-active {
+    opacity: 1;
+    font-weight: 500;
+    /* Ajouter un surlignage pour les onglets actifs */
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--accent-color);
+    }
+  }
+  
+  /* Meilleur contraste pour les étiquettes des onglets */
+  .mat-tab-group.mat-primary .mat-tab-label:not(.mat-tab-disabled):focus,
+  .mat-tab-group.mat-primary .mat-tab-link:not(.mat-tab-disabled):focus,
+  .mat-tab-nav-bar.mat-primary .mat-tab-label:not(.mat-tab-disabled):focus,
+  .mat-tab-nav-bar.mat-primary .mat-tab-link:not(.mat-tab-disabled):focus {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .mat-tab-header, .mat-tab-nav-bar {
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  /* Styles pour les champs de formulaire Material */
+  .mat-form-field {
+    .mat-form-field-label {
+      color: var(--text-color) !important;
+    }
+    
+    .mat-input-element, .mat-select-value-text {
+      color: var(--text-color) !important;
+    }
+    
+    .mat-form-field-required-marker {
+      color: var(--accent-color) !important;
+    }
+  }
+  
+  /* Styles pour les champs avec apparence "outline" */
+  .mat-form-field-appearance-outline {
+    .mat-form-field-outline {
+      color: var(--border-color) !important;
+    }
+    
+    .mat-form-field-outline-thick {
+      color: var(--text-color) !important;
+    }
+    
+    &.mat-focused .mat-form-field-outline-thick {
+      color: var(--accent-color) !important;
+    }
+  }
+  
+  /* Icônes dans les champs de formulaire */
+  .mat-form-field-suffix .mat-icon,
+  .mat-form-field-prefix .mat-icon {
+    color: var(--text-color-secondary) !important;
+  }
+  
+  /* Styles pour les boutons */
+  .mat-button, .mat-icon-button, .mat-stroked-button {
+    color: var(--text-color) !important;
+  }
+  
+  .mat-flat-button.mat-primary,
+  .mat-raised-button.mat-primary,
+  .mat-fab.mat-primary,
+  .mat-mini-fab.mat-primary {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+  }
+}
+
+/* Styles spécifiques pour les thèmes sombres */
+body.dark-theme,
+.cyber-neon-theme,
+.emerald-ocean-theme,
+.cosmic-purple-theme {
+  /* Amélioration des contrastes pour les thèmes sombres */
+  .mat-tab-label, .mat-tab-link {
+    color: white !important;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  }
+  
+  .mat-tab-label-active::after {
+    box-shadow: 0 0 8px var(--accent-color);
+  }
+  
+  /* Textes avec contour pour meilleure lisibilité */
+  h1, h2, h3, h4, h5, h6, .mat-card-title {
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+  }
+  
+  /* Assurer la visibilité des bordures de champs */
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    opacity: 0.7 !important;
+  }
+  
+  /* Améliorer la visibilité des étiquettes */
+  .mat-form-field-label, .mat-label {
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+    font-weight: 500 !important;
+  }
+}
+
+/* Amélioration des styles de tableaux pour tous les thèmes */
+body, 
+body.dark-theme,
+.cyber-neon-theme,
+.sugar-candy-theme,
+.emerald-ocean-theme,
+.cosmic-purple-theme {
+  /* Styles pour les tables Material */
+  .mat-table {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    
+    .mat-header-row {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .mat-header-cell {
+      color: var(--text-color);
+      font-weight: 600;
+    }
+    
+    .mat-cell {
+      color: var(--text-color);
+    }
+    
+    .mat-row:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .mat-row:hover {
+      background-color: var(--translucent-bg);
+    }
+  }
+  
+  /* Amélioration de la lisibilité du paginateur */
+  .mat-paginator {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    
+    .mat-paginator-container {
+      color: var(--text-color);
+    }
+    
+    .mat-paginator-page-size-label,
+    .mat-paginator-range-label {
+      color: var(--text-color);
+    }
+    
+    .mat-paginator-navigation-first,
+    .mat-paginator-navigation-previous,
+    .mat-paginator-navigation-next,
+    .mat-paginator-navigation-last {
+      color: var(--text-color);
+    }
+    
+    .mat-select-value-text {
+      color: var(--text-color);
+    }
+  }
+
+  /* Amélioration des styles pour le filtre de recherche */
+  .mat-form-field.mat-focused .mat-form-field-label {
+    color: var(--accent-color);
+  }
+  
+  .mat-form-field.mat-focused .mat-form-field-ripple {
+    background-color: var(--accent-color);
+  }
+}
+
+/* Augmentation du contraste pour les thèmes sombres spécifiquement */
+body.dark-theme,
+.cyber-neon-theme,
+.emerald-ocean-theme,
+.cosmic-purple-theme {
+  .mat-table {
+    /* Fond légèrement plus clair pour les tables dans les thèmes sombres */
+    background-color: rgba(255, 255, 255, 0.03);
+    
+    /* Bordures plus visibles */
+    .mat-header-row, .mat-row {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Police plus épaisse pour les cellules */
+    .mat-cell {
+      font-weight: 500;
+    }
+  }
+  
+  /* Meilleure visibilité du paginateur */
+  .mat-paginator {
+    background-color: rgba(255, 255, 255, 0.05);
+    
+    .mat-paginator-navigation-first,
+    .mat-paginator-navigation-previous,
+    .mat-paginator-navigation-next,
+    .mat-paginator-navigation-last {
+      &:not([disabled]) {
+        color: var(--accent-color);
+      }
+    }
+  }
+}
+
 
 /* Utility classes */
 .full-width {
@@ -173,6 +676,27 @@ body.dark-theme {
 .success-snackbar {
   background-color: #4caf50;
   color: white;
+}
+
+.mat-mdc-tab-group {
+  --mdc-tab-indicator-active-indicator-color:  var(--accent-color); 
+  --mat-tab-header-active-label-text-color:  var(--accent-color); 
+
+   // Texte par défaut (inactif)
+  .mdc-tab__text-label {
+    color: var(--text-color-secondary)!important; 
+  }
+
+   // Texte actif
+   .mdc-tab--active .mdc-tab__text-label {
+    color:var(--accent-color) !important; // actif
+    font-weight: 600;
+  }
+
+  // facultatif : hover
+  .mat-mdc-tab:hover .mdc-tab__text-label {
+    color:  var(--accent-color); 
+  }
 }
 
 /* Responsive adjustments */

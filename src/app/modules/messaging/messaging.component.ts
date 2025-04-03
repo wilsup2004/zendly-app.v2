@@ -9,8 +9,11 @@ import { PriseEnChargeService } from '../../core/services/prise-en-charge.servic
 import { User } from '../../core/models/user.model';
 import { Colis } from '../../core/models/colis.model';
 import { PriseEnCharge } from '../../core/models/prise-en-charge.model';
+import { Message } from '../../core/models/message.model';
 import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { UnreadMessagesCounterService } from '../../core/services/unread-messages-counter.service';
+
 
 interface ChatRoom {
   id: number;
@@ -26,18 +29,6 @@ interface ChatRoom {
   relatedTrajet?: PriseEnCharge;
 }
 
-interface ChatMessage {
-  id?: number;
-  idPrise: number;
-  idUserPrise: string;
-  idUserColis: string;
-  sender: string;
-  horodatage: Date;
-  message: string;
-  isRead: boolean;
-  notificationSent: boolean;
-}
-
 @Component({
   selector: 'app-messaging',
   templateUrl: './messaging.component.html',
@@ -47,6 +38,7 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('chatMessages') private chatMessagesRef!: ElementRef;
   
   currentUser: User | null = null;
+  currentUserId: string | null = null;
   
   // État de l'interface
   loading = true;
@@ -55,7 +47,7 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
   
   // Données
   chatRooms: ChatRoom[] = [];
-  messages: ChatMessage[] = [];
+  messages: Message[] = [];
   
   // Formulaire
   messageForm: FormGroup;
@@ -69,7 +61,8 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
     private chatService: ChatService,
     private authService: AuthService,
     private colisService: ColisService,
-    private priseEnChargeService: PriseEnChargeService
+    private priseEnChargeService: PriseEnChargeService,
+    private unreadMessagesCounterService: UnreadMessagesCounterService
   ) {
     this.messageForm = this.fb.group({
       message: ['', [Validators.required]]
@@ -80,6 +73,8 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.currentUser = this.authService.currentUser;
     
     if (this.currentUser) {
+      this.currentUserId = this.currentUser.idUser;
+      
       // Initialiser la connexion WebSocket
       this.chatService.initializeWebSocketConnection(this.currentUser.idUser);
       
@@ -143,7 +138,7 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
           const room: ChatRoom = {
             id: roomId,
             name: `${priseEnCharge.villeDepart} → ${priseEnCharge.villeArrivee}`,
-            unreadCount: 0,
+            unreadCount: 0, // Initialiser à 0, sera mis à jour plus tard
             users: [
               {
                 id: priseEnCharge.users.idUser,
@@ -164,7 +159,10 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
             });
           }
           
-          // Charger le dernier message
+          // Ajouter la salle au tableau
+          this.chatRooms.push(room);
+          
+          // Charger le dernier message et le compteur non lu
           this.chatService.getMessageHistory(roomId)
             .subscribe({
               next: (messages) => {
@@ -172,19 +170,16 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
                   const lastMessage = messages[messages.length - 1];
                   room.lastMessage = lastMessage.message;
                   room.lastMessageDate = lastMessage.horodatage;
-                  
-                  // Compter les messages non lus
-                  room.unreadCount = messages.filter(m => 
-                    !m.isRead && 
-                    m.sender !== this.currentUser?.idUser
-                  ).length;
                 }
                 
-                // Ajouter la salle au tableau
-                this.chatRooms.push(room);
-                
-                // Trier les salles par date de dernier message
-                this.sortRooms();
+                // Utiliser le service pour obtenir le compteur de messages non lus
+                this.unreadMessagesCounterService.getUnreadCountForRoom(roomId)
+                  .subscribe(count => {
+                    room.unreadCount = count;
+                    
+                    // Trier les salles par date de dernier message
+                    this.sortRooms();
+                  });
               }
             });
         }
@@ -266,6 +261,8 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.loadingMessages = true;
     this.messages = [];
     
+    console.log('Sélection de la salle:', roomId);
+    
     // Charger l'historique des messages
     this.chatService.getMessageHistory(roomId)
       .pipe(finalize(() => {
@@ -275,10 +272,10 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
         next: (messages) => {
           this.messages = messages;
           
-          // Marquer les messages comme lus
-          this.markMessagesAsRead();
+          // Marquer tous les messages comme lus via le service
+          this.unreadMessagesCounterService.markAllMessagesAsReadInRoom(roomId);
           
-          // Mettre à jour le compteur de messages non lus
+          // Mettre à jour le compteur local dans la liste des salles
           const room = this.chatRooms.find(r => r.id === roomId);
           if (room) {
             room.unreadCount = 0;
@@ -301,7 +298,7 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (!room) return;
     
     // Créer un message
-    const message: ChatMessage = {
+    const message: Message = {
       idPrise: this.selectedRoomId,
       idUserPrise: room.users.find(u => u.id !== this.currentUser?.idUser)?.id || '',
       idUserColis: this.currentUser.idUser,
@@ -337,32 +334,119 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
       });
   }
   
-  markMessagesAsRead(): void {
-    if (!this.currentUser || !this.selectedRoomId) return;
+  // Méthode pour marquer les messages comme lus
+  markMessagesAsRead(messages: Message[]): void {
+    if (!this.currentUserId || !this.selectedRoomId) return;
     
-    // Parcourir les messages non lus
-    this.messages.forEach(message => {
-      if (!message.isRead && message.sender !== this.currentUser?.idUser) {
-        this.chatService.markMessageAsRead(
-          this.selectedRoomId!,
-          message.horodatage,
-          this.currentUser!.idUser
-        ).subscribe();
+    // Le compteur sera mis à jour automatiquement par le service
+    // lorsqu'un message est marqué comme lu
+    const unreadMessages = messages.filter(
+      m => !m.isRead && m.sender !== this.currentUserId
+    );
+    
+    // Si pas de messages non lus, rien à faire
+    if (unreadMessages.length === 0) return;
+    
+    console.log('Marquage de messages comme lus:', unreadMessages.length);
+    
+    // Pour chaque message non lu
+    unreadMessages.forEach(message => {
+      try {
+        // Convertir en Date valide
+        let messageDate: Date;
         
-        // Marquer le message comme lu localement
-        message.isRead = true;
+        if (message.horodatage instanceof Date) {
+          messageDate = message.horodatage;
+        } else if (typeof message.horodatage === 'string') {
+          messageDate = new Date(message.horodatage);
+        } else {
+          messageDate = new Date();
+          console.warn('Format de date invalide:', message);
+        }
+        
+        // Marquer comme lu via ChatService (le service de compteur s'en occupe)
+        this.chatService.markMessageAsRead(
+          this.selectedRoomId as number, 
+          messageDate,
+          this.currentUserId
+        ).subscribe();
+      } catch (error) {
+        console.error('Erreur lors du marquage du message comme lu:', error);
       }
     });
   }
   
+  // Méthode pour mettre à jour le compteur de messages non lus
+  updateUnreadCount(): void {
+    if (!this.currentUserId) return;
+    
+    // Pour chaque salle, compter les messages non lus
+    this.chatRooms.forEach(room => {
+      this.chatService.getMessageHistory(room.id)
+        .subscribe({
+          next: (messages) => {
+            room.unreadCount = messages.filter(m => 
+              !m.isRead && 
+              m.sender !== this.currentUserId
+            ).length;
+          }
+        });
+    });
+  }
+  
   subscribeToMessages(): void {
-    // TODO: Implémenter la réception des messages WebSocket
+    if (!this.currentUserId) return;
+    
+    // S'abonner aux nouveaux messages via WebSocket
+    const messageSub = this.chatService.newMessage$.subscribe(message => {
+      // Si le message appartient à la conversation actuelle
+      if (message.idPrise === this.selectedRoomId) {
+        // Vérifier si le message est déjà présent
+        const isDuplicate = this.messages.some(m => 
+          m.sender === message.sender && 
+          new Date(m.horodatage).getTime() === new Date(message.horodatage).getTime() &&
+          m.message === message.message
+        );
+        
+        if (!isDuplicate) {
+          // Ajouter le message à la liste
+          this.messages.push(message);
+          
+          // Si c'est un message reçu et que l'utilisateur est dans la conversation, le marquer comme lu
+          if (message.sender !== this.currentUserId) {
+            this.markMessagesAsRead([message]);
+          }
+        }
+      }
+      
+      // Mettre à jour le dernier message de la salle concernée
+      const room = this.chatRooms.find(r => r.id === message.idPrise);
+      if (room) {
+        room.lastMessage = message.message;
+        room.lastMessageDate = message.horodatage;
+        
+        // Mettre à jour le compteur non lu (sera géré par le service)
+        this.unreadMessagesCounterService.getUnreadCountForRoom(message.idPrise)
+          .subscribe(count => {
+            room.unreadCount = count;
+            
+            // Trier les salles
+            this.sortRooms();
+          });
+      }
+    });
+    
+    this.subscriptions.push(messageSub);
   }
   
   scrollToBottom(): void {
     try {
-      this.chatMessagesRef.nativeElement.scrollTop = this.chatMessagesRef.nativeElement.scrollHeight;
-    } catch (err) {}
+      if (this.chatMessagesRef && this.chatMessagesRef.nativeElement) {
+        this.chatMessagesRef.nativeElement.scrollTop = this.chatMessagesRef.nativeElement.scrollHeight;
+      }
+    } catch (err) {
+      console.error('Erreur lors du défilement:', err);
+    }
   }
   
   sortRooms(): void {
@@ -374,13 +458,23 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
     });
   }
   
-  isOwnMessage(message: ChatMessage): boolean {
+  isOwnMessage(message: Message): boolean {
     return message.sender === this.currentUser?.idUser;
   }
   
   getOtherUser(room: ChatRoom): { id: string, name: string } | undefined {
     if (!this.currentUser) return undefined;
     return room.users.find(u => u.id !== this.currentUser?.idUser);
+  }
+
+  /**
+   * Récupère le colis associé à la conversation sélectionnée
+   * @returns Le colis associé ou undefined si aucun colis n'est associé
+   */
+  getSelectedRelatedColis(): Colis | undefined {
+    if (!this.selectedRoomId) return undefined;
+    const room = this.chatRooms.find(r => r.id === this.selectedRoomId);
+    return room?.relatedColis;
   }
   
   getFormattedDate(date: Date): string {
@@ -404,26 +498,25 @@ export class MessagingComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   /**
- * Récupère le nom de la salle de chat sélectionnée
- */
-getSelectedRoomName(): string {
-  if (!this.selectedRoomId) return '';
-  
-  const room = this.chatRooms.find(r => r.id === this.selectedRoomId);
-  return room?.name || '';
-}
+   * Récupère le nom de la salle de chat sélectionnée
+   */
+  getSelectedRoomName(): string {
+    if (!this.selectedRoomId) return '';
+    
+    const room = this.chatRooms.find(r => r.id === this.selectedRoomId);
+    return room?.name || '';
+  }
 
-/**
- * Récupère le nom de l'autre utilisateur dans la salle de chat sélectionnée
- */
-getSelectedRoomOtherUserName(): string {
-  if (!this.selectedRoomId) return '';
-  
-  const room = this.chatRooms.find(r => r.id === this.selectedRoomId);
-  if (!room) return '';
-  
-  const otherUser = this.getOtherUser(room);
-  return otherUser?.name || '';
-}
-
+  /**
+   * Récupère le nom de l'autre utilisateur dans la salle de chat sélectionnée
+   */
+  getSelectedRoomOtherUserName(): string {
+    if (!this.selectedRoomId) return '';
+    
+    const room = this.chatRooms.find(r => r.id === this.selectedRoomId);
+    if (!room) return '';
+    
+    const otherUser = this.getOtherUser(room);
+    return otherUser?.name || '';
+  }
 }

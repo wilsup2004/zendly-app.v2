@@ -14,8 +14,22 @@
       </mat-card-content>
     </mat-card>
     
+    <!-- Stepper horizontal -->
+    <div *ngIf="currentUser" class="trajet-stepper">
+      <div class="stepper-step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+        <div class="step-number">1</div>
+        <div class="step-label">Informations du trajet</div>
+      </div>
+      <div class="stepper-connector" [class.active]="currentStep > 1"></div>
+      <div class="stepper-step" [class.active]="currentStep === 2">
+        <div class="step-number">2</div>
+        <div class="step-label">Sélection du colis</div>
+      </div>
+    </div>
+    
     <form [formGroup]="trajetForm" (ngSubmit)="onSubmit()" *ngIf="currentUser">
-      <mat-card class="trajet-card">
+      <!-- Étape 1: Informations du trajet -->
+      <mat-card *ngIf="currentStep === 1" class="trajet-card">
         <mat-card-header>
           <mat-card-title>Informations du trajet</mat-card-title>
         </mat-card-header>
@@ -69,7 +83,7 @@
             <div class="search-action">
               <button 
                 mat-raised-button 
-                color="primary" 
+                class="theme-button" 
                 type="button" 
                 (click)="searchFlights()" 
                 [disabled]="!trajetForm.get('aeroportDepart')?.value || !trajetForm.get('aeroportArrivee')?.value || searchingFlights">
@@ -220,22 +234,123 @@
               </div>
             </div>
             
-            <div class="terms-container">
-              <mat-checkbox required>
-                J'accepte les <a href="#" class="terms-link">conditions générales</a> et je m'engage à transporter les colis qui me seront confiés dans les conditions définies par la plateforme.
-              </mat-checkbox>
-            </div>
-            
             <div class="form-actions">
               <button 
                 mat-raised-button 
-                color="primary" 
-                type="submit" 
-                [disabled]="trajetForm.invalid || loading">
-                <span *ngIf="!loading">Déclarer mon trajet</span>
-                <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+                class="theme-button"
+                type="button" 
+                (click)="nextStep()"
+                [disabled]="trajetForm.invalid">
+                Suivant <mat-icon>arrow_forward</mat-icon>
               </button>
             </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <!-- Étape 2: Sélection du colis -->
+      <mat-card *ngIf="currentStep === 2" class="trajet-card">
+        <mat-card-header>
+          <mat-card-title>Sélection du colis à transporter</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <!-- État de chargement -->
+          <div *ngIf="loadingColis" class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span>Chargement des colis disponibles...</span>
+          </div>
+          
+          <!-- Aucun colis -->
+          <div *ngIf="!loadingColis && userColis.length === 0" class="empty-colis">
+            <mat-icon>inventory_2</mat-icon>
+            <p>Vous n'avez pas encore de colis déclarés</p>
+            <button mat-raised-button color="primary" (click)="createNewColis()">
+              <mat-icon>add</mat-icon>
+              Créer un colis
+            </button>
+          </div>
+          
+          <!-- Colis compatibles -->
+          <div *ngIf="!loadingColis && colisCompatibles.length > 0">
+            <div class="trajet-summary">
+              <h3>Trajet sélectionné</h3>
+              <div class="trajet-path">
+                <div class="city">{{ trajetForm.get('villeDepart')?.value }}</div>
+                <mat-icon>arrow_forward</mat-icon>
+                <div class="city">{{ trajetForm.get('villeArrivee')?.value }}</div>
+              </div>
+            </div>
+            
+            <p class="info-text">Sélectionnez un colis compatible avec votre trajet :</p>
+            
+            <div class="colis-list">
+              <div *ngFor="let colis of colisCompatibles" 
+                   class="colis-item" 
+                   [class.selected]="selectedColis === colis"
+                   (click)="selectColis(colis)">
+                <div class="colis-info">
+                  <div class="colis-title">Colis #{{ colis.idColis }}</div>
+                  <div class="colis-path">
+                    <div class="city">{{ colis.villeDepart }}</div>
+                    <mat-icon>arrow_forward</mat-icon>
+                    <div class="city">{{ colis.villeArrivee }}</div>
+                  </div>
+                  <div class="colis-details">
+                    <div class="colis-detail">
+                      <mat-icon>scale</mat-icon>
+                      <span>{{ colis.nbKilo }} kg</span>
+                    </div>
+                    <div class="colis-detail">
+                      <mat-icon>straighten</mat-icon>
+                      <span>{{ colis.longueur }}×{{ colis.largeur }}×{{ colis.hauteur }} cm</span>
+                    </div>
+                    <div class="colis-detail">
+                      <mat-icon>euro</mat-icon>
+                      <span>{{ colis.tarif }} €</span>
+                    </div>
+                  </div>
+                  <div class="colis-description" *ngIf="colis.description">
+                    {{ colis.description }}
+                  </div>
+                </div>
+                <div class="selected-indicator" *ngIf="selectedColis === colis">
+                  <mat-icon>check_circle</mat-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Colis non compatibles -->
+          <div *ngIf="!loadingColis && userColis.length > 0 && colisCompatibles.length === 0" class="empty-colis">
+            <mat-icon>warning</mat-icon>
+            <p>Vous n'avez pas de colis compatibles ou disponibles pour ce trajet</p>
+            <p class="trajet-info">
+              Trajet: {{ trajetForm.get('villeDepart')?.value }} → {{ trajetForm.get('villeArrivee')?.value }}
+            </p>
+            <p class="notice-text">Note: Les colis déjà associés à une prise en charge ne sont pas affichés.</p>
+            <button mat-raised-button color="primary" (click)="createNewColis()">
+              <mat-icon>add</mat-icon>
+              Créer un colis compatible
+            </button>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              mat-button
+              type="button" 
+              (click)="previousStep()">
+              <mat-icon>arrow_back</mat-icon> Retour
+            </button>
+            
+            <button 
+              mat-raised-button 
+              class="theme-button"
+              type="submit" 
+              [disabled]="!selectedColis || loading">
+              <span *ngIf="!loading">Déclarer mon trajet</span>
+              <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+            </button>
           </div>
         </mat-card-content>
       </mat-card>

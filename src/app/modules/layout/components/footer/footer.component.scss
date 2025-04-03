@@ -1,8 +1,10 @@
 /* src/app/modules/layout/components/footer/footer.component.scss */
 .footer {
-  background-color: var(--card-background);
+ // background-color: var(--card-background);
   border-top: 1px solid var(--border-color);
   padding: 16px;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
 }
 
 .footer-content {

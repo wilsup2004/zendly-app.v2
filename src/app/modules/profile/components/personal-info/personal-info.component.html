@@ -1,0 +1,139 @@
+<!-- src/app/modules/profile/components/personal-info/personal-info.component.html -->
+<div class="personal-info-container">
+  <h3>Informations personnelles</h3>
+  <p>Modifiez vos informations personnelles</p>
+  
+  <form [formGroup]="personalInfoForm" (ngSubmit)="onSubmit()">
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="prenom" required>
+        <mat-error *ngIf="personalInfoForm.get('prenom')?.hasError('required')">
+          Le prénom est requis
+        </mat-error>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline">
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="nom" required>
+        <mat-error *ngIf="personalInfoForm.get('nom')?.hasError('required')">
+          Le nom est requis
+        </mat-error>
+      </mat-form-field>
+    </div>
+    
+    <!-- Afficher le pseudo (non modifiable) -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Pseudo</mat-label>
+        <input matInput [value]="currentUser?.idUser" disabled>
+        <mat-hint>Le pseudo ne peut pas être modifié</mat-hint>
+      </mat-form-field>
+    </div>
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="mail" type="email" required>
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="personalInfoForm.get('mail')?.hasError('required')">
+          L'email est requis
+        </mat-error>
+        <mat-error *ngIf="personalInfoForm.get('mail')?.hasError('email')">
+          Veuillez entrer une adresse email valide
+        </mat-error>
+      </mat-form-field>
+    </div>
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Téléphone</mat-label>
+        <input matInput formControlName="telephone" placeholder="Ex: 0612345678">
+        <mat-icon matSuffix>phone</mat-icon>
+        <mat-error *ngIf="personalInfoForm.get('telephone')?.hasError('pattern')">
+          Veuillez entrer un numéro de téléphone valide (10 chiffres)
+        </mat-error>
+      </mat-form-field>
+    </div>
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Adresse</mat-label>
+        <input matInput formControlName="adresse" required>
+        <mat-error *ngIf="personalInfoForm.get('adresse')?.hasError('required')">
+          L'adresse est requise
+        </mat-error>
+      </mat-form-field>
+    </div>
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Complément d'adresse</mat-label>
+        <input matInput formControlName="complementAdresse">
+      </mat-form-field>
+    </div>
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Code Postal</mat-label>
+        <input matInput formControlName="codePostal" required>
+        <mat-error *ngIf="personalInfoForm.get('codePostal')?.hasError('required')">
+          Le code postal est requis
+        </mat-error>
+        <mat-error *ngIf="personalInfoForm.get('codePostal')?.hasError('pattern')">
+          Format incorrect (5 chiffres)
+        </mat-error>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline">
+        <mat-label>Ville</mat-label>
+        <input matInput formControlName="ville" required>
+        <mat-error *ngIf="personalInfoForm.get('ville')?.hasError('required')">
+          La ville est requise
+        </mat-error>
+      </mat-form-field>
+    </div>
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Pays</mat-label>
+        <mat-select formControlName="pays">
+          <mat-option *ngFor="let pays of countryList" [value]="pays">{{ pays }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    
+    <!-- Ajout du statut du compte (visible uniquement pour les admins) -->
+    <div class="form-row" *ngIf="userIsAdmin">
+      <mat-slide-toggle 
+        formControlName="isActif" 
+        color="primary" 
+        class="status-toggle">
+        Compte actif
+      </mat-slide-toggle>
+      <div class="mat-hint">La désactivation du compte empêchera l'utilisateur de se connecter</div>
+    </div>
+    
+    <div class="form-actions">
+      <button 
+        mat-raised-button 
+        class="button-enregistrer"
+        type="submit"
+        [disabled]="personalInfoForm.invalid || loading"
+      >
+        <mat-icon *ngIf="!loading">save</mat-icon>
+        <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+        <span>Enregistrer</span>
+      </button>
+      
+      <button 
+        mat-button 
+        type="button" 
+        (click)="resetForm()"
+        [disabled]="loading"
+      >
+        Annuler
+      </button>
+    </div>
+  </form>
+</div>

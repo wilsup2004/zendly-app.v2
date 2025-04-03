@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models/user.model';
 import { AdminUser } from '../../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { UserDetailsDialogComponent } from '../user-details-dialog/user-details-dialog.component';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -31,8 +32,9 @@ export class UserManagementComponent implements OnInit {
   dataSource: MatTableDataSource<User> = new MatTableDataSource<User>();
   adminDataSource: MatTableDataSource<AdminUser> = new MatTableDataSource<AdminUser>();
   
-  displayedColumns: string[] = ['idUser', 'nom', 'prenom', 'mail', 'actions'];
-  adminDisplayedColumns: string[] = ['idUser', 'nom', 'prenom', 'adminLevel', 'creationDate', 'lastLogin', 'actions'];
+  // Ajout des colonnes pour le téléphone et le statut
+  displayedColumns: string[] = ['idUser', 'nom', 'prenom', 'mail', 'telephone', 'isActif', 'actions'];
+  adminDisplayedColumns: string[] = ['idUser', 'nom', 'prenom', 'adminLevel', 'telephone', 'creationDate', 'lastLogin', 'actions'];
   
   // Admin form
   showAdminForm = false;
@@ -68,6 +70,9 @@ export class UserManagementComponent implements OnInit {
       .subscribe({
         next: (users) => {
           this.users = users;
+          
+        
+          
           this.dataSource.data = users;
           
           // Configuration de la pagination et du tri
@@ -76,7 +81,7 @@ export class UserManagementComponent implements OnInit {
             this.dataSource.sort = this.sort;
           });
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Erreur lors du chargement des utilisateurs:', error);
           this.snackBar.open('Erreur lors du chargement des utilisateurs', 'Fermer', {
             duration: 3000,
@@ -93,6 +98,17 @@ export class UserManagementComponent implements OnInit {
       .subscribe({
         next: (admins) => {
           this.admins = admins;
+          
+          // Assurer la compatibilité avec les attributs is_actif et isActive dans les objets utilisateurs des admins
+  /*
+          this.admins.forEach(admin => {
+            if (admin.user.isActif === undefined && admin.user.isActif !== undefined) {
+              admin.user.isActif = admin.user.isActif;
+            } else if (admin.user.isActif === undefined) {
+              admin.user.isActif = true; // Valeur par défaut
+            }
+          });
+  */        
           this.adminDataSource.data = admins;
           
           // Configuration de la pagination et du tri
@@ -103,7 +119,7 @@ export class UserManagementComponent implements OnInit {
             }
           });
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Erreur lors du chargement des administrateurs:', error);
           this.snackBar.open('Erreur lors du chargement des administrateurs', 'Fermer', {
             duration: 3000,
@@ -140,7 +156,7 @@ export class UserManagementComponent implements OnInit {
       width: '400px',
       data: {
         title: 'Confirmation',
-        message: `Êtes-vous sûr de vouloir ${user.isActive ? 'désactiver' : 'activer'} cet utilisateur ?`,
+        message: `Êtes-vous sûr de vouloir ${user.isActif ? 'désactiver' : 'activer'} cet utilisateur ?`,
         confirmText: 'Confirmer',
         cancelText: 'Annuler'
       }
@@ -150,56 +166,47 @@ export class UserManagementComponent implements OnInit {
       if (result) {
         this.loading = true;
         
-        if (user.isActive) {
-          this.adminService.disableUser(user.idUser, this.currentUser!.idUser)
-            .pipe(finalize(() => {
-              this.loading = false;
-            }))
-            .subscribe({
-              next: () => {
-                user.isActive = false;
-                this.snackBar.open('Utilisateur désactivé avec succès', 'Fermer', {
-                  duration: 3000,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom'
-                });
-              },
-              error: (error) => {
-                console.error('Erreur lors de la désactivation de l\'utilisateur:', error);
-                this.snackBar.open('Erreur lors de la désactivation de l\'utilisateur', 'Fermer', {
-                  duration: 3000,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom',
-                  panelClass: ['error-snackbar']
-                });
-              }
-            });
-        } else {
-          this.adminService.enableUser(user.idUser, this.currentUser!.idUser)
-            .pipe(finalize(() => {
-              this.loading = false;
-            }))
-            .subscribe({
-              next: () => {
-                user.isActive = true;
-                this.snackBar.open('Utilisateur activé avec succès', 'Fermer', {
-                  duration: 3000,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom'
-                });
-              },
-              error: (error) => {
-                console.error('Erreur lors de l\'activation de l\'utilisateur:', error);
-                this.snackBar.open('Erreur lors de l\'activation de l\'utilisateur', 'Fermer', {
-                  duration: 3000,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom',
-                  panelClass: ['error-snackbar']
-                });
-              }
-            });
-        }
+        // Mise à jour pour utiliser le nouvel attribut is_actif
+        const newStatus = !user.isActif;
+        
+        // Utiliser les méthodes existantes enableUser ou disableUser au lieu de updateUserStatus
+        const method = newStatus ? 
+          this.adminService.enableUser(user.idUser, this.currentUser!.idUser) :
+          this.adminService.disableUser(user.idUser, this.currentUser!.idUser);
+        
+        method.pipe(finalize(() => {
+            this.loading = false;
+          }))
+          .subscribe({
+            next: () => {
+              user.isActif = newStatus;
+              //user.isActive = newStatus; // Maintenir la compatibilité
+              
+              this.snackBar.open(`Utilisateur ${newStatus ? 'activé' : 'désactivé'} avec succès`, 'Fermer', {
+                duration: 3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom'
+              });
+            },
+            error: (error: any) => {
+              console.error(`Erreur lors de ${newStatus ? 'l\'activation' : 'la désactivation'} de l'utilisateur:`, error);
+              this.snackBar.open(`Erreur lors de ${newStatus ? 'l\'activation' : 'la désactivation'} de l'utilisateur`, 'Fermer', {
+                duration: 3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass: ['error-snackbar']
+              });
+            }
+          });
       }
+    });
+  }
+  
+  // Nouvelle méthode pour afficher les détails d'un utilisateur
+  viewUserDetails(user: User): void {
+    this.dialog.open(UserDetailsDialogComponent, {
+      width: '600px',
+      data: { user }
     });
   }
   
@@ -240,7 +247,7 @@ export class UserManagementComponent implements OnInit {
           this.loadAdmins();
           this.loadUsers();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Erreur lors de la création de l\'administrateur:', error);
           this.snackBar.open('Erreur lors de la création de l\'administrateur', 'Fermer', {
             duration: 3000,
@@ -289,7 +296,7 @@ export class UserManagementComponent implements OnInit {
                 verticalPosition: 'bottom'
               });
             },
-            error: (error) => {
+            error: (error: any) => {
               console.error('Erreur lors de la mise à jour du niveau d\'administrateur:', error);
               this.snackBar.open('Erreur lors de la mise à jour du niveau d\'administrateur', 'Fermer', {
                 duration: 3000,
@@ -336,7 +343,7 @@ export class UserManagementComponent implements OnInit {
               this.loadAdmins();
               this.loadUsers();
             },
-            error: (error) => {
+            error: (error: any) => {
               console.error('Erreur lors de la suppression de l\'administrateur:', error);
               this.snackBar.open('Erreur lors de la suppression de l\'administrateur', 'Fermer', {
                 duration: 3000,
@@ -357,34 +364,32 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
+  /**
+   * Vérifie si un utilisateur n'est pas déjà administrateur
+   */
+  isNotAdmin(user: User): boolean {
+    return !this.admins.some(admin => admin.user.idUser === user.idUser);
+  }
 
   /**
- * Vérifie si un utilisateur n'est pas déjà administrateur
- */
-isNotAdmin(user: User): boolean {
-  return !this.admins.some(admin => admin.user.idUser === user.idUser);
-}
+   * Vérifie si l'administrateur est l'utilisateur courant
+   */
+  isCurrentUser(admin: AdminUser): boolean {
+    return admin.user.idUser === this.currentUser?.idUser;
+  }
 
-/**
- * Vérifie si l'administrateur est l'utilisateur courant
- */
-isCurrentUser(admin: AdminUser): boolean {
-  return admin.user.idUser === this.currentUser?.idUser;
-}
+  /**
+   * Vérifie si le champ adminLevel a une erreur de type required
+   */
+  hasAdminLevelRequiredError(): boolean {
+    return this.adminForm.get('adminLevel')?.hasError('required') || false;
+  }
 
-/**
- * Vérifie si le champ adminLevel a une erreur de type required
- */
-hasAdminLevelRequiredError(): boolean {
-  return this.adminForm.get('adminLevel')?.hasError('required') || false;
-}
-
-/**
- * Vérifie si le champ adminLevel a une erreur de type min ou max
- */
-hasAdminLevelRangeError(): boolean {
-  const adminLevelControl = this.adminForm.get('adminLevel');
-  return (adminLevelControl?.hasError('min') || adminLevelControl?.hasError('max')) || false;
-}
-
+  /**
+   * Vérifie si le champ adminLevel a une erreur de type min ou max
+   */
+  hasAdminLevelRangeError(): boolean {
+    const adminLevelControl = this.adminForm.get('adminLevel');
+    return (adminLevelControl?.hasError('min') || adminLevelControl?.hasError('max')) || false;
+  }
 }

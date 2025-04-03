@@ -60,7 +60,7 @@ export class DashboardComponent implements OnInit {
     
     // Récupérer les données du tableau de bord
     forkJoin({
-      colis: this.colisService.getColisByUserAndStatut(userId),
+      colis: this.colisService.getColisByUserAndStatut(1,userId),
       prisesEnCharge: this.priseEnChargeService.getPriseEnChargeByUserAndStatut(userId)
     }).subscribe({
       next: (data) => {

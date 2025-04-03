@@ -1,5 +1,6 @@
 // src/environments/environment.prod.ts
 export const environment = {
   production: true,
-  apiUrl: 'https://api.zendly.com/api'
+  apiUrl: 'https://api.zendly.com/api',
+  socketUrl: 'ws://api.zendly.com/api'
 };

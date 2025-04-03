@@ -5,6 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { PaymentRoutingModule } from './payment-routing.module';
 import { PaymentComponent } from './payment.component';
+import { PaymentListComponent } from './payment-list/payment-list.component';
 import { PaymentSuccessComponent } from './payment-success/payment-success.component';
 import { PaymentCancelComponent } from './payment-cancel/payment-cancel.component';
 
@@ -19,11 +20,15 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   declarations: [
     PaymentComponent,
+    PaymentListComponent,
     PaymentSuccessComponent,
     PaymentCancelComponent
   ],
@@ -42,6 +47,9 @@ import { SharedModule } from '../../shared/shared.module';
     MatProgressSpinnerModule,
     MatDividerModule,
     MatSnackBarModule,
+    MatTableModule,
+    MatSortModule,
+    MatTooltipModule,
     SharedModule
   ]
 })

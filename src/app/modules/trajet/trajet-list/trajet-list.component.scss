@@ -1,6 +1,9 @@
 /* src/app/modules/trajet/trajet-list/trajet-list.component.scss */
 .trajet-list-container {
   padding: 24px;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .trajet-list-header {
@@ -36,6 +39,7 @@
     gap: 8px;
     padding: 0 16px;
     height: 40px;
+    background-color: var(--primary-color);
     
     mat-icon {
       margin-right: 4px;
@@ -129,6 +133,20 @@
     color: var(--text-color-secondary);
     font-size: 1.1rem;
   }
+
+  .custom-button {
+  
+    color: var(--text-color)!important;
+  
+    &.primary {
+      background-color: var(--primary-color) !important;
+    }
+    &.accent {
+      background-color: var(--accent-color) !important;
+    }
+  
+  }
+  
 }
 
 .trajet-grid {

@@ -36,6 +36,20 @@
     margin-bottom: 16px;
     color: var(--text-color-secondary);
   }
+
+  .custom-button {
+  
+    color: var(--text-color)!important;
+  
+    &.primary {
+      background-color: var(--primary-color) !important;
+    }
+    &.accent {
+      background-color: var(--accent-color) !important;
+    }
+  
+  }
+
 }
 
 .colis-list {

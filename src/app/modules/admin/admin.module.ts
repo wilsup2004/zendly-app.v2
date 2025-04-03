@@ -7,8 +7,10 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { AdminDashboardComponent } from './dashboard/admin-dashboard.component';
 import { UserManagementComponent } from './user-management/user-management.component';
 import { ColisManagementComponent } from './colis-management/colis-management.component';
-import { PaymentManagementComponent } from './payment-management/payment-management.component';
+import { AdminConfigComponent } from './config/admin-config.component';
+import { PaymentManagementComponent, PaymentDetailsDialogComponent } from './payment-management/payment-management.component';
 import { LogsComponent } from './logs/logs.component';
+import { UserDetailsDialogComponent } from './user-details-dialog/user-details-dialog.component';
 
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -35,6 +37,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // Ajout de ce module
 
 // NgxCharts
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -48,7 +51,10 @@ import { SharedModule } from '../../shared/shared.module';
     UserManagementComponent,
     ColisManagementComponent,
     PaymentManagementComponent,
-    LogsComponent
+    LogsComponent,
+    UserDetailsDialogComponent,
+    PaymentDetailsDialogComponent,
+    AdminConfigComponent
   ],
   imports: [
     CommonModule,
@@ -79,6 +85,7 @@ import { SharedModule } from '../../shared/shared.module';
     MatListModule,
     MatDividerModule,
     MatProgressBarModule,
+    MatSlideToggleModule, // Ajout de ce module
     NgxChartsModule,
     SharedModule
   ]

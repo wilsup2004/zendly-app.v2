@@ -37,6 +37,8 @@
           
           <div class="room-participants">
             <span class="participant-name">{{ getOtherUser(room)?.name }}</span>
+            <!-- Affichage du numéro de colis s'il existe -->
+            <span *ngIf="room.relatedColis" class="colis-badge">Colis associé: #{{ room.relatedColis.idColis }}</span>
           </div>
           
           <div *ngIf="room.lastMessage" class="room-last-message">
@@ -66,11 +68,18 @@
         <div class="conversation-info">
           <h3>{{ getSelectedRoomName() }}</h3>
           <p>{{ getSelectedRoomOtherUserName() }}</p>
+          <!-- Ajout de l'information du colis associé dans l'en-tête -->
+          <div *ngIf="getSelectedRelatedColis()" class="trajet-detail">
+            <div class="colis-item">
+              <mat-icon>inventory_2</mat-icon>
+              <span class="colis-badge">Colis associé: #{{ getSelectedRelatedColis()?.idColis }}</span>
+            </div>
+          </div>
         </div>
         
         <!-- Additional actions -->
         <div class="conversation-actions">
-          <button mat-icon-button matTooltip="Voir les détails">
+          <button mat-icon-button matTooltip="Voir les détails" color="accent">
             <mat-icon>info</mat-icon>
           </button>
         </div>
@@ -119,7 +128,7 @@
               type="submit" 
               mat-icon-button 
               matSuffix 
-              color="primary" 
+              color="accent" 
               [disabled]="messageForm.invalid">
               <mat-icon>send</mat-icon>
             </button>

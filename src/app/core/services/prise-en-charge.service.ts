@@ -1,9 +1,9 @@
 // src/app/core/services/prise-en-charge.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PriseEnCharge } from '../models/prise-en-charge.model';
 import { environment } from '../../../environments/environment';
+import { PriseEnCharge } from '../models/prise-en-charge.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,51 +11,86 @@ import { environment } from '../../../environments/environment';
 export class PriseEnChargeService {
   private apiUrl = `${environment.apiUrl}/trade/priseEnCharge`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  // Récupérer toutes les prises en charge
+  /**
+   * Crée une nouvelle prise en charge (avec un colis associé obligatoire)
+   * @param priseEnCharge Les informations de la prise en charge
+   * @returns Un Observable contenant la réponse de l'API
+   */
+  createPriseEnCharge(priseEnCharge: any): Observable<any> {
+    // Validation: vérifier que le colis est bien présent
+    if (!priseEnCharge.colis) {
+      throw new Error('Un colis doit être associé à la prise en charge');
+    }
+    
+    return this.http.post(this.apiUrl, priseEnCharge);
+  }
+
+  /**
+   * Récupère toutes les prises en charge
+   * @returns Un Observable contenant la liste des prises en charge
+   */
   getAllPriseEnCharge(): Observable<PriseEnCharge[]> {
     return this.http.get<PriseEnCharge[]>(this.apiUrl);
   }
 
-  // Récupérer une prise en charge par ID
+  /**
+   * Récupère une prise en charge par son ID
+   * @param id L'ID de la prise en charge
+   * @returns Un Observable contenant la prise en charge
+   */
   getPriseEnChargeById(id: number): Observable<PriseEnCharge> {
     return this.http.get<PriseEnCharge>(`${this.apiUrl}/${id}`);
   }
 
-  // Récupérer les prises en charge par utilisateur
-  getPriseEnChargeByUser(user: any): Observable<PriseEnCharge[]> {
-    return this.http.post<PriseEnCharge[]>(`${this.apiUrl}/user`, user);
-  }
-
-  // Récupérer une prise en charge par colis
-  getPriseEnChargeByColis(colisId: number): Observable<PriseEnCharge> {
-    return this.http.get<PriseEnCharge>(`${this.apiUrl}/colis/${colisId}`);
-  }
-
-  // Récupérer les prises en charge par utilisateur et statut
-  getPriseEnChargeByUserAndStatut(userId: string, statutId?: number): Observable<PriseEnCharge[]> {
-    let params = new HttpParams().set('userNom', userId);
+  /**
+   * Récupère les prises en charge d'un utilisateur
+   * @param userId L'ID de l'utilisateur
+   * @param statut Le statut des prises en charge à récupérer (optionnel)
+   * @returns Un Observable contenant la liste des prises en charge
+   */
+  getPriseEnChargeByUserAndStatut(userId: string, statut?: number): Observable<PriseEnCharge[]> {
+    let url = `${this.apiUrl}/userstatut?userNom=${userId}`;
     
-    if (statutId) {
-      params = params.set('statut', statutId.toString());
+    if (statut) {
+      url += `&statut=${statut}`;
     }
     
-    return this.http.get<PriseEnCharge[]>(`${this.apiUrl}/userstatut`, { params });
+    return this.http.get<PriseEnCharge[]>(url);
   }
 
-  // Créer une prise en charge
-  createPriseEnCharge(priseEnCharge: Partial<PriseEnCharge>): Observable<any> {
-    return this.http.post(this.apiUrl, priseEnCharge);
-  }
-
-  // Mettre à jour une prise en charge
+  /**
+   * Met à jour une prise en charge
+   * @param id L'ID de la prise en charge
+   * @param priseEnCharge Les nouvelles informations de la prise en charge
+   * @returns Un Observable contenant la réponse de l'API
+   */
   updatePriseEnCharge(id: number, priseEnCharge: PriseEnCharge): Observable<any> {
+    // Validation: vérifier que le colis est bien présent
+    if (!priseEnCharge.colis) {
+      throw new Error('Un colis doit être associé à la prise en charge');
+    }
+    
     return this.http.put(`${this.apiUrl}/${id}`, priseEnCharge);
   }
 
-  // Annuler une prise en charge
+  /**
+   * Annule une prise en charge
+   * @param id L'ID de la prise en charge
+   * @param priseEnCharge Les informations de la prise en charge
+   * @returns Un Observable contenant la réponse de l'API
+   */
   annulerPriseEnCharge(id: number, priseEnCharge: PriseEnCharge): Observable<any> {
     return this.http.put(`${this.apiUrl}/annule/${id}`, priseEnCharge);
+  }
+  
+  /**
+   * Récupère une prise en charge par son colis associé
+   * @param colisId L'ID du colis
+   * @returns Un Observable contenant la prise en charge
+   */
+  getPriseEnChargeByColis(colisId: number): Observable<PriseEnCharge> {
+    return this.http.get<PriseEnCharge>(`${this.apiUrl}/colis/${colisId}`);
   }
 }

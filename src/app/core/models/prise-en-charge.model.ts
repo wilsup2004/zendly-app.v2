@@ -1,15 +1,16 @@
-import { Colis, Statut } from "./colis.model";
-import { User } from "./user.model";
-
 // src/app/core/models/prise-en-charge.model.ts
+import { User } from './user.model';
+import { Statuts } from './statuts.model';
+import { Colis } from './colis.model';
+
 export interface PriseEnCharge {
   idPrise: number;
-  colis: Colis;
-  statuts: Statut;
   users: User;
-  idVol: string;
+  statuts: Statuts;
+  colis: Colis; // Maintenant obligatoire
+  idVol?: string;
   villeDepart: string;
-  dateDepart: Date;
+  dateDepart: Date | string;
   villeArrivee: string;
-  dateArrivee: Date;
+  dateArrivee: Date | string;
 }

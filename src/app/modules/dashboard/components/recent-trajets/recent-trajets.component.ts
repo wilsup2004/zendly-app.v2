@@ -17,7 +17,7 @@ import { PriseEnCharge } from '../../../../core/models/prise-en-charge.model';
       <div *ngIf="!loading && trajets.length === 0" class="empty-state">
         <mat-icon>flight</mat-icon>
         <p>Aucun trajet récent</p>
-        <button mat-raised-button color="primary" routerLink="/trajet/create">Déclarer un trajet</button>
+        <button mat-raised-button class="custom-button primary" routerLink="/trajet/create">Déclarer un trajet</button>
       </div>
       
       <!-- Liste des trajets -->
@@ -93,6 +93,18 @@ import { PriseEnCharge } from '../../../../core/models/prise-en-charge.model';
         color: var(--text-color-secondary);
         font-size: 1.1rem;
       }
+      .custom-button {
+  
+        color: var(--text-color)!important;
+  
+        &.primary {
+          background-color: var(--primary-color) !important;
+        }
+        &.accent {
+          background-color: var(--accent-color) !important;
+        }
+  
+       }
     }
 
     .trajets-list {

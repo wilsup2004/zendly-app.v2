@@ -173,11 +173,13 @@ mat-card-actions {
     display: flex;
     align-items: center;
     gap: 4px;
+    color: var(--primary-color);
     
     mat-icon {
       font-size: 18px;
       width: 18px;
       height: 18px;
+      color: var(--primary-color);
     }
   }
 }

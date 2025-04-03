@@ -1,0 +1,113 @@
+/* src/app/modules/admin/config/admin-config.component.scss */
+
+.admin-config-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
+}
+
+.admin-config-header {
+  margin-bottom: 24px;
+  
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+  }
+  
+  p {
+    margin: 8px 0 0;
+    color: var(--text-color)!important;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  
+  p {
+    margin-top: 16px;
+  }
+}
+
+.admin-config-content {
+  .config-card {
+    margin-bottom: 24px;
+    
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--glow-effect);
+  
+  }
+  
+
+  mat-card-header {
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    margin: 24px 0 16px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    
+    mat-form-field {
+      flex: 1;
+      min-width: 200px;
+    }
+  }
+  
+  mat-form-field {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .fees-example {
+    background-color:  var(--text-color-secondary);
+    border-radius: 4px;
+    padding: 16px;
+    margin: 16px 0;
+    
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+    
+    strong {
+      color: var(--primary-color);
+    }
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 24px;
+  }
+}
+
+.custom-button {
+  background-color:var(--primary-color)!important;
+}
+
+
+/* Style pour la carte de statistiques des frais */
+.fees-card {
+  background-color: #e3f2fd; /* Bleu clair */
+  
+  .stat-value {
+    color: #1976d2; /* Bleu */
+  }
+}

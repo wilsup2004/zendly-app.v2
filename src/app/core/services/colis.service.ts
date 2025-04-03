@@ -1,9 +1,9 @@
 // src/app/core/services/colis.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Colis } from '../models/colis.model';
 import { environment } from '../../../environments/environment';
+import { Colis } from '../models/colis.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,60 +11,105 @@ import { environment } from '../../../environments/environment';
 export class ColisService {
   private apiUrl = `${environment.apiUrl}/trade/colis`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  // Récupérer tous les colis
+  /**
+   * Récupère tous les colis
+   * @returns Un Observable contenant la liste des colis
+   */
   getAllColis(): Observable<Colis[]> {
     return this.http.get<Colis[]>(this.apiUrl);
   }
 
-  // Récupérer un colis par ID
+  /**
+   * Récupère un colis par son ID
+   * @param id L'ID du colis
+   * @returns Un Observable contenant le colis
+   */
   getColisById(id: number): Observable<Colis> {
     return this.http.get<Colis>(`${this.apiUrl}/${id}`);
   }
 
-  // Récupérer l'image d'un colis
-  getColisImage(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/image/${id}`, { responseType: 'blob' });
-  }
-
-  // Récupérer les colis par utilisateur et statut
-  getColisByUserAndStatut(userId: string, statutId?: number): Observable<Colis[]> {
-    let params = new HttpParams().set('userNom', userId);
+  /**
+   * Récupère les colis d'un utilisateur avec un statut donné
+   * @param statut Le statut des colis à récupérer
+   * @param userId L'ID de l'utilisateur (optionnel)
+   * @returns Un Observable contenant la liste des colis
+   */
+  getColisByUserAndStatut(statut: number, userId?: string): Observable<Colis[]> {
+    let url = `${this.apiUrl}/userstatut?userNom=${userId}`;
     
-    if (statutId) {
-      params = params.set('statut', statutId.toString());
+    if (statut) {
+      //url += `&userNom=${userId}`;
+      url += `&statut=${statut}`;
     }
     
-    return this.http.get<Colis[]>(`${this.apiUrl}/userstatut`, { params });
+    return this.http.get<Colis[]>(url);
   }
 
-  // Récupérer les colis par trajet et statut
-  getColisByTrajetAndStatut(origine: string, destination: string, statutId: number, userId?: string): Observable<Colis[]> {
-    let params = new HttpParams()
-      .set('origine', origine)
-      .set('destination', destination)
-      .set('statut', statutId.toString());
+  /**
+   * Récupère les colis disponibles (non associés à une prise en charge) d'un utilisateur
+   * @param userId L'ID de l'utilisateur
+   * @returns Un Observable contenant la liste des colis disponibles
+   */
+  getColisDiponibles(userId: string): Observable<Colis[]> {
+    // Utilise le statut 1 (Créé) qui correspond aux colis qui ne sont pas encore associés
+    return this.getColisByUserAndStatut(1, userId);
+  }
+
+  /**
+   * Récupère les colis compatibles avec un trajet
+   * @param origine La ville de départ
+   * @param destination La ville d'arrivée
+   * @param statut Le statut des colis à récupérer
+   * @param userId L'ID de l'utilisateur (optionnel)
+   * @returns Un Observable contenant la liste des colis
+   */
+  getColisByTrajetAndStatut(origine: string, destination: string, statut: number, userId?: string): Observable<Colis[]> {
+    let url = `${this.apiUrl}/trajet?origine=${origine}&destination=${destination}&statut=${statut}`;
     
     if (userId) {
-      params = params.set('idUser', userId);
+      url += `&idUser=${userId}`;
     }
     
-    return this.http.get<Colis[]>(`${this.apiUrl}/trajet`, { params });
+    return this.http.get<Colis[]>(url);
   }
 
-  // Créer un colis
+  /**
+   * Récupère l'image d'un colis
+   * @param colisId L'ID du colis
+   * @returns Un Observable contenant l'image du colis sous forme de Blob
+   */
+  getColisImage(colisId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/image/${colisId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  /**
+   * Crée un nouveau colis
+   * @param formData Les données du formulaire contenant les informations du colis
+   * @returns Un Observable contenant la réponse de l'API
+   */
   createColis(formData: FormData): Observable<any> {
     return this.http.post(this.apiUrl, formData);
   }
 
-  // Mettre à jour un colis
+  /**
+   * Met à jour un colis existant
+   * @param formData Les données du formulaire contenant les nouvelles informations du colis
+   * @returns Un Observable contenant la réponse de l'API
+   */
   updateColis(formData: FormData): Observable<any> {
     return this.http.put(this.apiUrl, formData);
   }
 
-  // Annuler une prise en charge
-  annulerPriseEnCharge(colis: Colis): Observable<any> {
+  /**
+   * Annule un colis
+   * @param colis Le colis à annuler
+   * @returns Un Observable contenant la réponse de l'API
+   */
+  annulerColis(colis: Colis): Observable<any> {
     return this.http.put(`${this.apiUrl}/annule`, colis);
   }
 }

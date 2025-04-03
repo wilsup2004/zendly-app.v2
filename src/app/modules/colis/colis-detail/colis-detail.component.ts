@@ -12,7 +12,7 @@ import { User } from '../../../core/models/user.model';
 import { PriseEnCharge } from '../../../core/models/prise-en-charge.model';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { switchMap, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-colis-detail',
@@ -85,7 +85,7 @@ export class ColisDetailComponent implements OnInit {
           
           // Vérifier si le colis a une prise en charge
           if (this.colis.priseEnCharges && this.colis.priseEnCharges.length > 0) {
-            return this.priseEnChargeService.getPriseEnChargeByColis(this.colisId);
+            return this.loadPriseEnCharge();
           }
           
           return of(null);
@@ -95,7 +95,7 @@ export class ColisDetailComponent implements OnInit {
         })
       )
       .subscribe({
-        next: (priseEnCharge: PriseEnCharge | null) => {
+        next: (priseEnCharge) => {
           if (priseEnCharge) {
             this.priseEnCharge = priseEnCharge;
             
@@ -135,6 +135,13 @@ export class ColisDetailComponent implements OnInit {
         console.error('Erreur lors du chargement de l\'image:', error);
       }
     });
+  }
+  
+  loadPriseEnCharge(): Observable<PriseEnCharge | null> {
+    if (!this.colisId) {
+      return of(null);
+    }
+    return this.priseEnChargeService.getPriseEnChargeByColis(this.colisId);
   }
   
   takeColis(): void {

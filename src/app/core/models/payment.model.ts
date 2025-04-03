@@ -1,8 +1,6 @@
-import { Colis } from "./colis.model";
-import { PriseEnCharge } from "./prise-en-charge.model";
-import { User } from "./user.model";
-
 // src/app/core/models/payment.model.ts
+// Ajouter ou mettre à jour ces interfaces
+
 export interface PaymentMethod {
   idMethod: number;
   methodName: string;
@@ -12,13 +10,20 @@ export interface PaymentMethod {
 
 export interface Payment {
   idPayment: number;
-  user: User;
-  colis: Colis;
-  priseEnCharge: PriseEnCharge;
+  userId: number | string;
+  colisId: number;
+  priseId: number;
+  user?: any;
+  colis?: any;
+  priseEnCharge?: any;
   paymentMethod: PaymentMethod;
-  paymentAmount: number;
   paymentStatus: string;
-  paymentDate: Date;
   transactionId: string;
-  paymentDetails: string;
+  paymentDate: Date;
+  paymentAmount: number; // Montant total avec frais
+  baseAmount: number;    // Montant de base du colis
+  serviceFees: number;   // Montant des frais de service
+  paymentDetails?: any;  // Données spécifiques au paiement
+  createdAt: Date;
+  updatedAt: Date;
 }

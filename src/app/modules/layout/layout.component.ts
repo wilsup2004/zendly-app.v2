@@ -1,11 +1,12 @@
 // src/app/modules/layout/layout.component.ts
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { ChatService } from '../../core/services/chat.service';
+import { UnreadMessagesCounterService } from '../../core/services/unread-messages-counter.service';
 import { User } from '../../core/models/user.model';
 
 @Component({
@@ -13,7 +14,7 @@ import { User } from '../../core/models/user.model';
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
 })
-export class LayoutComponent implements OnInit {
+export class LayoutComponent implements OnInit, OnDestroy {
   @ViewChild('drawer') drawer!: MatSidenav;
   
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
@@ -24,38 +25,44 @@ export class LayoutComponent implements OnInit {
   
   currentUser: User | null = null;
   unreadMessagesCount = 0;
+  
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private breakpointObserver: BreakpointObserver,
     private authService: AuthService,
-    private chatService: ChatService
+    private chatService: ChatService,
+    private unreadMessagesCounterService: UnreadMessagesCounterService
   ) {}
 
   ngOnInit(): void {
+    console.log('LayoutComponent - Initialisation');
+    
     // Récupérer l'utilisateur courant
-    this.authService.currentUser$.subscribe(user => {
+    const userSub = this.authService.currentUser$.subscribe(user => {
+      console.log('LayoutComponent - Utilisateur récupéré:', user);
       this.currentUser = user;
-      
-      // Si l'utilisateur est connecté, initialiser le WebSocket
-      if (user) {
-        this.chatService.initializeWebSocketConnection(user.idUser);
-        this.updateUnreadMessagesCount(user.idUser);
-      }
     });
+    
+    this.subscriptions.push(userSub);
+    
+    // S'abonner au compteur total de messages non lus
+    const unreadSub = this.unreadMessagesCounterService.totalUnreadCount$.subscribe(count => {
+      console.log('LayoutComponent - Compteur de messages non lus mis à jour:', count);
+      this.unreadMessagesCount = count;
+    });
+    
+    this.subscriptions.push(unreadSub);
+  }
+  
+  ngOnDestroy(): void {
+    console.log('LayoutComponent - Destruction');
+    
+    // Nettoyer les abonnements
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   toggleSidenav(): void {
     this.drawer.toggle();
-  }
-
-  updateUnreadMessagesCount(userId: string): void {
-    this.chatService.countUnreadMessages(userId).subscribe(
-      response => {
-        this.unreadMessagesCount = response.unreadCount;
-      },
-      error => {
-        console.error('Erreur lors de la récupération des messages non lus:', error);
-      }
-    );
   }
 }

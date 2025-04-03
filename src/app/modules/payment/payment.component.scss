@@ -3,6 +3,9 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .payment-header {
@@ -35,6 +38,42 @@
     color: var(--text-color-secondary);
     font-size: 1.1rem;
   }
+}
+
+.order-subtotal, .order-fees {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.order-fees {
+  display: flex;
+  align-items: center;
+}
+
+.fees-label {
+  flex: 1;
+}
+
+.fees-info {
+  margin-left: 8px;
+  color: #666;
+}
+
+.fees-info mat-icon {
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  cursor: help;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .error-state {

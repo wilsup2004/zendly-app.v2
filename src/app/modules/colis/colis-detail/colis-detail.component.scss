@@ -1,6 +1,10 @@
 /* src/app/modules/colis/colis-detail/colis-detail.component.scss */
 .colis-detail-container {
   padding: 24px;
+  min-height: 80vh;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .loading-state {
@@ -45,6 +49,20 @@
   }
 }
 
+.custom-button {
+  
+  color: var(--text-color)!important;
+
+  &.primary {
+    background-color: var(--primary-color) !important;
+  }
+  &.accent {
+    background-color: var(--accent-color) !important;
+  }
+
+}
+
+
 .colis-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -77,11 +95,14 @@
   flex-wrap: wrap;
   gap: 12px;
   
+  /*
   button {
     display: flex;
     align-items: center;
     gap: 8px;
   }
+    */
+
 }
 
 .status-badge {

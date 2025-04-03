@@ -1,0 +1,122 @@
+/* src/app/modules/messaging/components/conversation/conversation.component.scss */
+.conversation-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  
+  /* Ajouter un défilement fluide */
+  scroll-behavior: smooth;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  position: relative;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  
+  &.sent {
+    align-self: flex-end;
+    background-color: var(--primary-light, #e3f2fd);
+    color: var(--on-primary-light, #000000);
+    border-bottom-right-radius: 4px;
+    
+    .message-timestamp {
+      text-align: right;
+    }
+  }
+  
+  &.received {
+    align-self: flex-start;
+    background-color: var(--surface, #ffffff);
+    color: var(--on-surface, #000000);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--divider, #e0e0e0);
+  }
+}
+
+.message-content {
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  
+  /* Ajuster l'espacement pour les petits écrans */
+  @media (max-width: 600px) {
+    font-size: 0.65rem;
+  }
+}
+
+.read-status {
+  font-size: 16px;
+  margin-left: 4px;
+  
+  &.read {
+    color: var(--accent, #4caf50);
+  }
+  
+  &.unread {
+    opacity: 0.5;
+  }
+  
+  /* Ajuster la taille pour les petits écrans */
+  @media (max-width: 600px) {
+    font-size: 14px;
+  }
+}
+
+.message-input {
+  padding: 8px 16px 16px;
+  background-color: var(--background, #ffffff);
+  border-top: 1px solid var(--divider, #e0e0e0);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.no-messages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary, #757575);
+  text-align: center;
+  padding: 20px;
+  
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+}
+
+/* Ajout d'une transition pour le focus sur le champ de saisie */
+:host ::ng-deep .mat-form-field-flex {
+  transition: box-shadow 0.3s ease;
+}
+
+:host ::ng-deep .mat-focused .mat-form-field-flex {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,101 @@
+/* src/app/modules/profile/components/photo-upload/photo-upload.component.scss */
+.photo-upload-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+.profile-photo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--card-background);
+  border: 2px solid var(--border-color);
+  box-shadow: var(--glow-effect);
+  
+  .photo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--translucent-bg);
+    
+    mat-icon {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      color: var(--text-color-secondary);
+    }
+  }
+  
+  .photo-actions {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    gap: 4px;
+    
+    .edit-photo-btn,
+    .remove-photo-btn {
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      background-color: var(--accent-color);
+      color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+      
+      &:hover {
+        background-color: var(--primary-color);
+      }
+    }
+    
+    .remove-photo-btn {
+      background-color: #f44336;
+    }
+  }
+}
+
+.upload-progress {
+  margin-top: 8px;
+  text-align: center;
+  
+  mat-progress-bar {
+    margin-bottom: 4px;
+  }
+  
+  span {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+  }
+}
+
+/* Styles pour mettre en évidence la présence du bouton d'édition */
+.profile-photo::after {
+  content: "Photo de profil";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 4px 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 0.7rem;
+  text-align: center;
+  text-transform: uppercase;
+}

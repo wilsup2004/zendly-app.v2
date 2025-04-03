@@ -1,0 +1,46 @@
+<!-- src/app/modules/profile/components/photo-upload/photo-upload.component.html -->
+<div class="photo-upload-container">
+  <div class="profile-photo">
+    <img 
+      [src]="currentPhotoUrl || '/assets/images/default-avatar.png'" 
+      alt="Photo de profil"
+      class="photo-preview"
+    >
+    
+    <div class="photo-actions">
+      <button 
+        mat-icon-button 
+        type="button" 
+        class="edit-photo-btn"
+        (click)="openFileInput()"
+        matTooltip="Changer la photo"
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+      
+      <button 
+        *ngIf="currentPhotoUrl"
+        mat-icon-button 
+        type="button" 
+        class="remove-photo-btn"
+        (click)="removePhoto()"
+        matTooltip="Supprimer la photo"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <input
+    type="file"
+    id="profile-photo-input"
+    hidden
+    accept="image/*"
+    (change)="onFileSelected($event)"
+  >
+  
+  <div *ngIf="uploadProgress > 0 && uploadProgress < 100" class="upload-progress">
+    <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+    <span>{{ uploadProgress }}%</span>
+  </div>
+</div>

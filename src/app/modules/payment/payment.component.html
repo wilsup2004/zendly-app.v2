@@ -59,8 +59,25 @@
           <mat-divider></mat-divider>
           
           <div *ngIf="colis" class="order-total">
-            <div class="total-label">Total :</div>
-            <div class="total-value">{{ colis.tarif }} €</div>
+            <div class="order-subtotal">
+              <div class="subtotal-label">Prix du colis:</div>
+              <div class="subtotal-value">{{ colis.tarif }} €</div>
+            </div>
+            
+            <div class="order-fees">
+              <div class="fees-label">Frais de service ({{ serviceFeesPercentage }}%):</div>
+              <div class="fees-value">{{ serviceFeesAmount | number:'1.2-2' }} €</div>
+              <div class="fees-info">
+                <mat-icon matTooltip="Ces frais permettent de garantir un service sécurisé et de qualité">info</mat-icon>
+              </div>
+            </div>
+            
+            <mat-divider></mat-divider>
+            
+            <div class="total-row">
+              <div class="total-label">Total :</div>
+              <div class="total-value">{{ totalAmount | number:'1.2-2' }} €</div>
+            </div>
           </div>
         </mat-card-content>
       </mat-card>
@@ -179,13 +196,13 @@
             <div class="payment-actions">
               <button type="button" mat-button (click)="backToDetails()">Annuler</button>
               <button 
-                type="submit" 
-                mat-raised-button 
-                color="primary" 
-                [disabled]="paymentForm.invalid || processing">
-                <span *ngIf="!processing">Payer {{ colis?.tarif || '' }} €</span>
-                <mat-spinner *ngIf="processing" diameter="24"></mat-spinner>
-              </button>
+              type="submit" 
+              mat-raised-button 
+              color="primary" 
+              [disabled]="paymentForm.invalid || processing">
+              <span *ngIf="!processing">Payer {{ totalAmount | number:'1.2-2' }} €</span>
+              <mat-spinner *ngIf="processing" diameter="24"></mat-spinner>
+            </button>
             </div>
           </form>
         </mat-card-content>

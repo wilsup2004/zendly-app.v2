@@ -1,0 +1,59 @@
+<!-- src/app/modules/admin/user-details-dialog/user-details-dialog.component.html -->
+<h2 mat-dialog-title>Détails de l'utilisateur</h2>
+<mat-dialog-content>
+  <div class="user-details">
+    <div class="detail-row">
+      <span class="label">Pseudo:</span>
+      <span class="value">{{ user.idUser }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Nom:</span>
+      <span class="value">{{ user.nom }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Prénom:</span>
+      <span class="value">{{ user.prenom }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Email:</span>
+      <span class="value">{{ user.mail }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Téléphone:</span>
+      <span class="value">{{ user.telephone || 'Non renseigné' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Status:</span>
+      <span class="value" [ngClass]="user.isActif ? 'active-status' : 'inactive-status'">
+        {{ user.isActif ? 'Actif' : 'Inactif' }}
+      </span>
+    </div>
+    
+    <div class="address-section" >
+      <h3>Adresse</h3>
+      <div class="detail-row">
+        <span class="label">Rue:</span>
+        <span class="value">{{ user.adresse || 'Non renseigné' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Complément:</span>
+        <span class="value">{{ user.complementAdresse }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Code postal:</span>
+        <span class="value">{{ user.codePostal || 'Non renseigné' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Ville:</span>
+        <span class="value">{{ user.ville || 'Non renseigné' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Pays:</span>
+        <span class="value">{{ user.pays || 'Non renseigné' }}</span>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="closeDialog()">Fermer</button>
+</mat-dialog-actions>

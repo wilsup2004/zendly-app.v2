@@ -1,0 +1,41 @@
+/* src/app/modules/admin/user-details-dialog/user-details-dialog.component.scss */
+.user-details {
+  padding: 16px;
+  
+  .detail-row {
+    display: flex;
+    margin-bottom: 8px;
+    
+    .label {
+      font-weight: 500;
+      width: 120px;
+      color: var(--text-color-secondary);
+    }
+    
+    .value {
+      flex: 1;
+    }
+  }
+  
+  .address-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+    
+    h3 {
+      margin-bottom: 16px;
+      font-size: 1.1rem;
+      color: var(--text-color);
+    }
+  }
+  
+  .active-status {
+    color: #4caf50;
+    font-weight: 500;
+  }
+  
+  .inactive-status {
+    color: #f44336;
+    font-weight: 500;
+  }
+}

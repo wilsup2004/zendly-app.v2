@@ -17,7 +17,7 @@
       </div>
       
       <div class="trajet-actions">
-        <button *ngIf="canContact" mat-raised-button color="primary" (click)="contactOwner()">
+        <button *ngIf="canContact" mat-raised-button class="custom-button primary" (click)="contactOwner()">
           <mat-icon>message</mat-icon>
           Contacter le transporteur
         </button>
@@ -140,7 +140,7 @@
           <div *ngIf="!loadingColis && matchingColis.length === 0" class="empty-colis">
             <mat-icon>inventory_2</mat-icon>
             <p>Vous n'avez pas de colis compatibles avec ce trajet</p>
-            <button mat-raised-button color="primary" routerLink="/colis/create">
+            <button mat-raised-button class="custom-button primary" routerLink="/colis/create">
               Créer un colis
             </button>
           </div>
@@ -166,7 +166,7 @@
               </div>
               <button 
                 mat-raised-button 
-                color="primary" 
+                class="custom-button primary"
                 (click)="$event.stopPropagation(); associateColis(colis.idColis)">
                 Demander
               </button>

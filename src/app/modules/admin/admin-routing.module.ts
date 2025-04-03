@@ -7,8 +7,15 @@ import { ColisManagementComponent } from './colis-management/colis-management.co
 import { PaymentManagementComponent } from './payment-management/payment-management.component';
 import { LogsComponent } from './logs/logs.component';
 import { AdminGuard } from '../../core/guards/admin.guard';
+import { AdminConfigComponent } from './config/admin-config.component';
 
 const routes: Routes = [
+ 
+  {
+    path: 'config',
+    component: AdminConfigComponent,
+    canActivate: [AdminGuard]
+  },
   {
     path: '',
     component: AdminDashboardComponent,

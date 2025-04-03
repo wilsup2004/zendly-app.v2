@@ -1,6 +1,10 @@
 /* src/app/modules/trajet/trajet-create/trajet-create.component.scss */
 .trajet-create-container {
   padding: 24px;
+  min-height: 80vh;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .trajet-create-header {
@@ -45,11 +49,78 @@
   }
 }
 
+/* Stepper */
+.trajet-stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120px;
+  
+  .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--text-color-secondary);
+    color: var(--card-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .step-label {
+    font-size: 0.9rem;
+    text-align: center;
+    color: var(--text-color-secondary);
+  }
+  
+  &.active {
+    .step-number {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .step-label {
+      color: var(--text-color);
+      font-weight: 500;
+    }
+  }
+  
+  &.completed {
+    .step-number {
+      background-color: var(--accent-color);
+      color: white;
+    }
+  }
+}
+
+.stepper-connector {
+  flex: 1;
+  height: 2px;
+  background-color: var(--text-color-secondary);
+  opacity: 0.3;
+  margin: 0 16px;
+  margin-bottom: 16px;
+  
+  &.active {
+    background-color: var(--primary-color);
+    opacity: 1;
+  }
+}
+
 .trajet-card {
   background-color: var(--card-background);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: var(--glow-effect);
+  margin-bottom: 24px;
   
   &:hover {
     box-shadow: var(--hover-glow);
@@ -174,10 +245,12 @@
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
   
   button {
-    min-width: 200px;
+    min-width: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -186,6 +259,191 @@
     mat-spinner {
       margin: 0 auto;
     }
+  }
+}
+
+.theme-button {
+  background-color: var(--primary-color)!important;
+  color: var(--text-color);
+  
+  &:hover:not([disabled]) {
+    background-color: var(--accent-color);
+    box-shadow: var(--hover-glow);
+  }
+  
+  &[disabled] {
+    background-color: rgba(0, 0, 0, 0.12);
+    color: rgba(0, 0, 0, 0.38);
+  }
+}
+
+/* Sélection de colis */
+.empty-colis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+  
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--text-color-secondary);
+    opacity: 0.5;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin-bottom: 16px;
+    color: var(--text-color-secondary);
+    text-align: center;
+  }
+  
+  .trajet-info {
+    background-color: var(--translucent-bg);
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  
+  .notice-text {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--text-color-secondary);
+    opacity: 0.8;
+    margin-bottom: 24px;
+  }
+}
+
+.info-text {
+  margin-bottom: 16px;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.colis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.colis-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--translucent-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-effect);
+  }
+  
+  &.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+  }
+}
+
+.colis-info {
+  flex: 1;
+}
+
+.colis-title {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 8px;
+}
+
+.colis-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.colis-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-color-secondary);
+  }
+  
+  span {
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+  }
+}
+
+.colis-description {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  margin-top: 8px;
+  max-height: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.trajet-summary {
+  background-color: var(--translucent-bg);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  
+  h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+}
+
+.trajet-path,
+.colis-path {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  
+  .city {
+    font-weight: 500;
+    color: var(--text-color);
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+  }
+  
+  mat-icon {
+    color: var(--text-color-secondary);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.selected-indicator {
+  mat-icon {
+    color: var(--primary-color);
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
   }
 }
 
@@ -204,6 +462,14 @@
     }
   }
   
+  .stepper-step {
+    width: 80px;
+    
+    .step-label {
+      font-size: 0.8rem;
+    }
+  }
+  
   .aeroport-selection,
   .form-row {
     flex-direction: column;
@@ -217,9 +483,15 @@
   
   .form-actions {
     flex-direction: column;
+    gap: 16px;
     
     button {
       width: 100%;
     }
+  }
+  
+  .colis-details {
+    flex-direction: column;
+    gap: 8px;
   }
 }

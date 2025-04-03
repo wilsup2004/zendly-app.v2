@@ -1,6 +1,9 @@
 /* src/app/modules/dashboard/dashboard.component.scss */
 .dashboard-container {
   padding: 24px;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .dashboard-header {
@@ -68,6 +71,12 @@ mat-card-header {
   .card-actions {
     display: flex;
     align-items: center;
+
+    .custom-button {
+  
+      color: var(--primary-color)!important;
+    }
+    
   }
 }
 
