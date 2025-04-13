@@ -105,6 +105,7 @@
   }
 }
 
+
 .payment-grid {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -167,8 +168,8 @@ mat-divider {
 }
 
 .order-total {
-  display: flex;
-  align-items: center;
+  //display: flex;
+  //align-items: center;
   margin-top: 16px;
   
   .total-label {
@@ -202,18 +203,22 @@ mat-divider {
   gap: 16px;
 }
 
+
 .payment-method-item {
   cursor: pointer;
   transition: transform 0.2s ease;
   
   &:hover {
     transform: translateY(-2px);
+     background-color: rgba(255, 255, 255, 0.1);
   }
   
   .method-info {
     display: flex;
     flex-direction: column;
     margin-left: 8px;
+    
+    
   }
   
   .method-name {
@@ -224,6 +229,141 @@ mat-divider {
   .method-description {
     font-size: 0.85rem;
     color: var(--text-color-secondary);
+  }
+
+  
+}
+
+// Styles pour la section PayPal
+.paypal-details {
+  margin-top: 24px;
+  
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 16px;
+  }
+  
+  .paypal-info {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: center;
+    
+    .paypal-description {
+      p {
+        margin: 0 0 8px 0;
+        font-size: 0.9rem;
+        color: var(--text-color-secondary);
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  
+  .paypal-security-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: rgba(66, 133, 244, 0.1);
+    
+    mat-icon {
+      color: #4285f4;
+    }
+    
+    span {
+      font-size: 0.9rem;
+    }
+  }
+  
+  .paypal-amount {
+    display: flex;
+    justify-content: space-between;
+    margin: 16px 0;
+    padding: 12px;
+    background-color: var(--translucent-bg);
+    border-radius: 8px;
+    
+    .amount-label {
+      font-weight: 500;
+    }
+    
+    .amount-value {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+  }
+  
+  .paypal-instructions {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+    }
+  }
+}
+
+.paypal-details {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  
+  .paypal-info-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    
+    .paypal-logo {
+      flex-shrink: 0;
+    }
+    
+    .paypal-info {
+      p {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  
+  .paypal-security {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    margin-bottom: 24px;
+    background-color: rgba(0, 112, 186, 0.1);
+    border-radius: 4px;
+    
+    mat-icon {
+      color: #0070ba;
+    }
+    
+    span {
+      font-size: 14px;
+    }
+  }
+  
+  .paypal-button-container {
+    min-height: 55px;
+    margin-top: 20px;
   }
 }
 
@@ -362,6 +502,16 @@ mat-divider {
     button {
       min-width: 200px;
     }
+  }
+}
+
+.custom-button {
+  background-color: var(--primary-color) !important;
+  color: var(--text-color) !important;
+  
+  &:hover:not([disabled]) {
+    background-color: var(--accent-color) !important;
+    box-shadow: var(--hover-glow) !important;
   }
 }
 

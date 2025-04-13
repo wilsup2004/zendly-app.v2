@@ -1,5 +1,5 @@
 // src/app/modules/payment/payment.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -14,6 +14,8 @@ import { PaymentMethod } from '../../core/models/payment.model';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AppConfigService } from '../../core/services/app-config.service';
+
+declare const paypal: any;
 
 @Component({
   selector: 'app-payment',
@@ -116,6 +118,120 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
   }
   
+  ngAfterViewInit(): void {
+    // Observer les changements de méthode de paiement
+    this.paymentForm.get('paymentMethod')?.valueChanges.subscribe(value => {
+      const selectedMethod = this.paymentMethods.find(m => m.idMethod === value);
+      this.selectedMethod = selectedMethod || null;
+      
+      // Si PayPal est sélectionné, initialiser le bouton PayPal
+      if (this.selectedMethod?.methodName === 'PayPal') {
+        setTimeout(() => {
+          this.initPayPalButton();
+        }, 100);
+      }
+    });
+  }
+
+  // Initialiser le bouton PayPal
+  initPayPalButton(): void {
+    if (!this.colis || !this.prise) return;
+    
+    // S'assurer que le conteneur est vide avant d'ajouter le bouton
+    const container = document.getElementById('paypal-button-container');
+    if (!container || typeof paypal === 'undefined') {
+      console.error('Conteneur PayPal non trouvé ou SDK PayPal non chargé');
+      return;
+    }
+    
+    // Vider le conteneur
+    container.innerHTML = '';
+
+      try {
+      // Créer le bouton PayPal
+      paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'blue',
+          shape: 'rect',
+          label: 'pay'
+        },
+        
+        // Configurer la transaction quand le bouton est cliqué
+        createOrder: (data: any, actions: any) => {
+          return actions.order.create({
+            purchase_units: [{
+              description: `Paiement pour colis #${this.colis!.idColis}`,
+              amount: {
+                currency_code: 'EUR',
+                value: this.totalAmount.toFixed(2)
+              }
+            }]
+          });
+        },
+        
+        // Callback appelé quand le paiement est approuvé
+        onApprove: (data: any, actions: any) => {
+          return actions.order.capture().then((details: any) => {
+            this.processing = true;
+            
+            // Envoyer les détails de la transaction à votre serveur
+            const paymentData = {
+              userId: this.currentUser?.idUser,
+              colisId: this.colis!.idColis,
+              priseId: this.prise!.idPrise,
+              paymentId: this.paymentId,
+              transactionId: details.id,
+              amount: this.totalAmount,
+              methodId: this.selectedMethod!.idMethod,
+              status: 'COMPLETED',
+              payerEmail: details.payer.email_address
+            };
+            
+            // Appel au service pour enregistrer le paiement
+            this.paymentService.createPaypalPayment(paymentData)
+              .pipe(finalize(() => {
+                this.processing = false;
+              }))
+              .subscribe({
+                next: (response) => {
+                  // Afficher le message de succès
+                  this.success = true;
+                  
+                  this.snackBar.open('Paiement effectué avec succès !', 'Fermer', {
+                    duration: 3000
+                  });
+                  
+                  // Rediriger vers la page de succès
+                  this.router.navigate(['/payment/success'], {
+                    queryParams: { paymentId: response.paymentId }
+                  });
+                },
+                error: (error) => {
+                  console.error('Erreur lors de l\'enregistrement du paiement:', error);
+                  this.snackBar.open('Le paiement PayPal a été effectué, mais une erreur est survenue lors de l\'enregistrement.', 'Fermer', {
+                    duration: 5000,
+                    panelClass: ['error-snackbar']
+                  });
+                }
+              });
+          });
+        },
+        
+        // Callback appelé en cas d'erreur
+        onError: (err: any) => {
+          console.error('Erreur PayPal:', err);
+          this.snackBar.open('Une erreur est survenue lors du traitement du paiement PayPal', 'Fermer', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      }).render('#paypal-button-container');
+    } catch (error) {
+      console.error('Erreur lors de l\'initialisation du bouton PayPal:', error);
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -293,97 +409,53 @@ calculateAmounts(): void {
   }
   
   processPayment(): void {
-    if (!this.currentUser || !this.colis || !this.prise || !this.selectedMethod || this.paymentForm.invalid) {
-      return;
-    }
-    
-    this.processing = true;
-    this.error = false;
-    
-    const paymentData = {
-      userId: this.currentUser.idUser,
-      colisId: this.colis.idColis,
-      priseId: this.prise.idPrise,
-      amount: this.totalAmount, // Utiliser le montant total avec frais
-      baseAmount: this.colis.tarif, // Montant de base du colis
-      serviceFees: this.serviceFeesAmount, // Montant des frais de service
-      methodId: this.selectedMethod.idMethod,
-      returnUrl: `${window.location.origin}/payment/success`,
-      cancelUrl: `${window.location.origin}/payment/cancel`,
-      // Informations de carte
-      ...(this.selectedMethod.methodName === 'Stripe' || this.selectedMethod.methodName === 'PayPal' ? {
-        cardNumber: this.paymentForm.get('cardNumber')?.value,
-        cardExpiry: this.paymentForm.get('cardExpiry')?.value,
-        cardCvc: this.paymentForm.get('cardCvc')?.value,
-        cardName: this.paymentForm.get('cardName')?.value
-      } : {}),
-      // Informations de mobile money
-      ...(this.selectedMethod.methodName === 'Orange Money' || this.selectedMethod.methodName === 'Mobile Money' ? {
-        phoneNumber: this.paymentForm.get('phoneNumber')?.value
-      } : {})
-    };
-    
-   // Utiliser le nouveau service de paiement avec frais
-  this.paymentService.createPaymentWithFees(paymentData)
-  .pipe(
-    takeUntil(this.destroy$),
-    finalize(() => {
-      this.processing = false;
-    })
-  )
-  .subscribe({
-    next: (response) => {
-      // Traitement selon la méthode de paiement (code existant)
-      switch (this.selectedMethod.methodName) {
+    if (!this.paymentForm.invalid) {
+      this.processing = true;
+      
+      // Récupérer la méthode de paiement sélectionnée
+      const methodId = this.paymentForm.get('paymentMethod')?.value;
+      
+      // Selon la méthode choisie, appeler le service approprié
+      switch(this.selectedMethod?.methodName) {
         case 'PayPal':
-          // Stocker l'ID du paiement dans localStorage pour reprise éventuelle
-          localStorage.setItem('pendingPaymentId', response.paymentId.toString());
+          this.processPaypalPayment({
+            userId: this.currentUser?.idUser,
+            paymentId: this.paymentId, // ID du paiement initialisé
+            methodId: methodId
+            // Autres données spécifiques à PayPal
+          });
+          break;
           
-          // Rediriger vers l'URL de paiement PayPal
-          window.location.href = response.paymentUrl;
-          break;
         case 'Stripe':
-          if (response.requiresAction) {
-            // Pour 3D Secure, rediriger vers la page de vérification
-            window.location.href = response.actionUrl;
-          } else {
-            // Paiement réussi
-            this.success = true;
-            this.updateStatus(response.paymentId);
-          }
+          this.processStripePayment({
+            userId: this.currentUser?.idUser,
+            paymentId: this.paymentId,
+            methodId: methodId,
+            cardNumber: this.paymentForm.get('cardNumber')?.value,
+            cardExpiry: this.paymentForm.get('cardExpiry')?.value,
+            cardCvc: this.paymentForm.get('cardCvc')?.value,
+            cardName: this.paymentForm.get('cardName')?.value
+          });
           break;
+          
         case 'Orange Money':
         case 'Mobile Money':
-          if (response.requiresConfirmation) {
-            // Afficher un message indiquant qu'une confirmation est nécessaire
-            this.snackBar.open('Veuillez confirmer le paiement sur votre téléphone', 'Fermer', {
-              duration: 5000,
-              horizontalPosition: 'center',
-              verticalPosition: 'bottom'
-            });
-            
-            // Vérifier le statut du paiement toutes les 5 secondes
-            this.checkPaymentStatus(response.paymentId);
-          } else {
-            // Paiement réussi
-            this.success = true;
-            this.updateStatus(response.paymentId);
-          }
+          this.processMobileMoneyPayment({
+            userId: this.currentUser?.idUser,
+            paymentId: this.paymentId,
+            methodId: methodId,
+            phoneNumber: this.paymentForm.get('phoneNumber')?.value,
+            provider: this.selectedMethod.methodName === 'Orange Money' ? 'orange' : 'mtn'
+          });
           break;
+          
         default:
           this.snackBar.open('Méthode de paiement non supportée', 'Fermer', {
-            duration: 3000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-            panelClass: ['error-snackbar']
+            duration: 3000
           });
+          this.processing = false;
       }
-    },
-    error: (error) => {
-      console.error('Erreur lors du traitement du paiement:', error);
-      this.handleError(error.error?.message || 'Erreur lors du traitement du paiement');
     }
-  });
   }
   
   processPaypalPayment(paymentData: any): void {

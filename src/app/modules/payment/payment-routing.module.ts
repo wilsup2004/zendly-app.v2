@@ -5,6 +5,7 @@ import { PaymentComponent } from './payment.component';
 import { PaymentListComponent } from './payment-list/payment-list.component';
 import { PaymentSuccessComponent } from './payment-success/payment-success.component';
 import { PaymentCancelComponent } from './payment-cancel/payment-cancel.component';
+import { MobilePaymentComponent } from './mobile-payment/mobile-payment.component';
 import { AuthGuard } from '../../core/guards/auth.guard';
 
 const routes: Routes = [
@@ -16,6 +17,11 @@ const routes: Routes = [
   {
     path: 'process',
     component: PaymentComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'mobile',
+    component: MobilePaymentComponent,
     canActivate: [AuthGuard]
   },
   {

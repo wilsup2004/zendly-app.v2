@@ -11,8 +11,11 @@ import { Colis } from '../../../core/models/colis.model';
 import { User } from '../../../core/models/user.model';
 import { PriseEnCharge } from '../../../core/models/prise-en-charge.model';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { switchMap, finalize } from 'rxjs/operators';
+import { switchMap, finalize,tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
+import { PaymentService } from '../../../core/services/payment.service';
+import { LoadingDialogComponent } from '../../../shared/components/loading-dialog/loading-dialog.component';
+
 
 @Component({
   selector: 'app-colis-detail',
@@ -43,7 +46,8 @@ export class ColisDetailComponent implements OnInit {
     private sanitizer: DomSanitizer,
     private colisService: ColisService,
     private priseEnChargeService: PriseEnChargeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private paymentService: PaymentService
   ) {}
   
   ngOnInit(): void {
@@ -68,6 +72,16 @@ export class ColisDetailComponent implements OnInit {
           // Vérifier si l'utilisateur est le propriétaire du colis
           if (this.currentUser && this.colis.users.idUser === this.currentUser.idUser) {
             this.isOwner = true;
+            console.log("L'utilisateur est bien le propriétaire du colis");
+          }else {
+            this.isOwner = false;
+            console.log("L'utilisateur n'est PAS le propriétaire du colis");
+            if (this.currentUser) {
+              console.log("ID utilisateur actuel:", this.currentUser.idUser);
+            }
+            if (this.colis && this.colis.users) {
+              console.log("ID propriétaire du colis:", this.colis.users.idUser);
+            }
           }
           
           // Vérifier si l'utilisateur peut prendre en charge le colis
@@ -84,11 +98,14 @@ export class ColisDetailComponent implements OnInit {
           this.loadColisImage();
           
           // Vérifier si le colis a une prise en charge
+          /*
           if (this.colis.priseEnCharges && this.colis.priseEnCharges.length > 0) {
             return this.loadPriseEnCharge();
-          }
+          }*/
+
+          return  this.loadPriseEnCharge();
           
-          return of(null);
+         // return of(null);
         }),
         finalize(() => {
           this.loading = false;
@@ -99,8 +116,10 @@ export class ColisDetailComponent implements OnInit {
           if (priseEnCharge) {
             this.priseEnCharge = priseEnCharge;
             
+            console.log("Prise en charge:", this.priseEnCharge);
+
             // Vérifier si l'utilisateur peut payer
-            if (this.isOwner && this.priseEnCharge.statuts.idStatut === 5) {
+            if (this.isOwner && this.priseEnCharge.statuts.idStatut === 4) {
               this.canPay = true;
             }
             
@@ -138,10 +157,16 @@ export class ColisDetailComponent implements OnInit {
   }
   
   loadPriseEnCharge(): Observable<PriseEnCharge | null> {
+    console.log("Chargement de la prise en charge pour le colis ID:", this.colisId);
     if (!this.colisId) {
       return of(null);
     }
-    return this.priseEnChargeService.getPriseEnChargeByColis(this.colisId);
+    return this.priseEnChargeService.getPriseEnChargeByColis(this.colisId).pipe(
+      tap(prise => {
+        console.log("Prise en charge chargée:", prise);
+        console.log("Statut de la prise en charge:", prise?.statuts);
+      })
+    );
   }
   
   takeColis(): void {
@@ -266,18 +291,111 @@ export class ColisDetailComponent implements OnInit {
     });
   }
   
-  goToPayment(): void {
-    if (!this.colis || !this.priseEnCharge) return;
-    
-    // Rediriger vers le paiement
-    this.router.navigate(['/payment'], { 
-      queryParams: { 
-        colisId: this.colisId,
-        priseId: this.priseEnCharge.idPrise
-      } 
+ // Ajouter cette méthode dans la classe ColisDetailComponent
+ goToPayment(): void {
+  if (!this.colis || !this.priseEnCharge) {
+    this.snackBar.open('Erreur: Informations du colis ou de la prise en charge manquantes', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['error-snackbar']
     });
+    return;
   }
-  
+
+  // Vérifier que l'utilisateur est bien le propriétaire du colis
+  if (!this.isOwner) {
+    this.snackBar.open('Seul le propriétaire du colis peut effectuer le paiement', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: ['error-snackbar']
+    });
+    return;
+  }
+
+  // Si le statut de la prise en charge n'est pas "En attente d'acceptation" ou "Accepté"
+  if (![4, 5].includes(this.priseEnCharge.statuts.idStatut)) {
+    this.snackBar.open('Ce colis n\'est pas prêt pour le paiement', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom'
+    });
+    return;
+  }
+
+  // Vérifier si un paiement est déjà en cours ou effectué
+  this.paymentService.isPaymentNeeded(this.colisId,this.priseEnCharge.idPrise).subscribe({
+    next: (needed: boolean) => {
+      if (!needed) {
+        this.snackBar.open('Ce colis a déjà été payé', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom'
+        });
+        return;
+      }
+
+      // Initialiser le paiement et rediriger vers la page de paiement
+      this.initiatePayment();
+    },
+    error: (error: any) => {
+      console.error('Erreur lors de la vérification du statut de paiement:', error);
+      this.snackBar.open('Erreur lors de la vérification du paiement', 'Fermer', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['error-snackbar']
+      });
+    }
+  });
+}
+
+// Initialiser le paiement
+private initiatePayment(): void {
+  const loadingDialog = this.dialog.open(LoadingDialogComponent, {
+    width: '300px',
+    disableClose: true,
+    data: { message: 'Initialisation du paiement...' }
+  });
+
+  this.paymentService.initiatePaymentForPriseEnCharge(this.colis!.idColis, this.priseEnCharge!.idPrise)
+    .pipe(finalize(() => loadingDialog.close()))
+    .subscribe({
+      next: (response: any) => {
+        if (response.paymentId) {
+          // Stocker l'ID du paiement temporairement
+          localStorage.setItem('pendingPaymentId', response.paymentId.toString());
+          
+          // Rediriger vers la page de paiement
+          this.router.navigate(['/payment/process'], { 
+            queryParams: { 
+              paymentId: response.paymentId,
+              colisId: this.colis!.idColis,
+              priseId: this.priseEnCharge!.idPrise
+            }
+          });
+        } else {
+          this.snackBar.open('Erreur lors de l\'initialisation du paiement', 'Fermer', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass: ['error-snackbar']
+          });
+        }
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de l\'initialisation du paiement:', error);
+        this.snackBar.open('Erreur lors de l\'initialisation du paiement', 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+}
+
   getStatusClass(idStatut: number): string {
     switch (idStatut) {
       case 1: // Créé

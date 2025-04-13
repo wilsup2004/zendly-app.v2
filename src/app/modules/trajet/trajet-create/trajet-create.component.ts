@@ -97,6 +97,8 @@ export class TrajetCreateComponent implements OnInit {
       
       // Capacité
       nbKilo: [5, [Validators.required, Validators.min(1), Validators.max(30)]]
+    }, { 
+      validators: this.dateRangeValidator 
     });
   }
   
@@ -208,27 +210,31 @@ export class TrajetCreateComponent implements OnInit {
   }
   
   // Aller à l'étape suivante
-  nextStep(): void {
-    if (this.currentStep === 1) {
-      if (this.trajetForm.invalid) {
-        // Marquer tous les champs comme touchés pour afficher les erreurs
-        Object.keys(this.trajetForm.controls).forEach(key => {
-          this.trajetForm.get(key)?.markAsTouched();
-        });
-        return;
-      }
-      
-      // Filtrer les colis compatibles et passer à l'étape suivante
-      this.loadingColis = true;
-      this.filterCompatibleColis();
-      this.currentStep = 2;
-      
-      // Si les colis n'ont pas encore été chargés, le chargement sera géré dans filterCompatibleColis()
-      if (this.userColis.length > 0) {
-        this.loadingColis = false;
-      }
-    }
+  ngAfterViewInit() {
+    setTimeout(() => {
+      console.log("État du formulaire:", this.trajetForm.valid);
+      console.log("Valeurs du formulaire:", this.trajetForm.value);
+      console.log("Erreurs du formulaire:", this.trajetForm.errors);
+    }, 2000);
   }
+
+ nextStep(): void {
+  console.log('Méthode nextStep appelée');
+  
+  if (this.trajetForm.invalid) {
+    console.log("Formulaire invalide, valeurs:", this.trajetForm.value);
+    // Marquer tous les champs comme touchés pour afficher les erreurs
+    Object.keys(this.trajetForm.controls).forEach(key => {
+      this.trajetForm.get(key)?.markAsTouched();
+    });
+    return;
+  }
+  
+  console.log("Passage à l'étape 2");
+  // Important: définir d'abord l'étape, puis filtrer les colis
+  this.currentStep = 2;
+  this.filterCompatibleColis();
+}
   
   // Revenir à l'étape précédente
   previousStep(): void {
@@ -237,6 +243,11 @@ export class TrajetCreateComponent implements OnInit {
     }
   }
   
+  logAndNextStep(): void {
+    console.log('Bouton cliqué');
+    this.nextStep();
+  }
+
   private loadAeroports(): void {
     this.trajetService.getAllAeroports().subscribe({
       next: (aeroports: Aeroport[]) => {
@@ -403,10 +414,16 @@ export class TrajetCreateComponent implements OnInit {
       dateArrivee: this.trajetForm.get('dateArrivee')?.value,
       nbKiloDispo: this.trajetForm.get('nbKilo')?.value,
       statuts: {
-        idStatut: 1, // Créé
-        libelStatut: 'CREE'
+        idStatut: 4, // Créé
+        libelStatut: 'PRISE_CHARGE'
       }
     };
+
+    // Mettre à jour le statut du colis
+  this.selectedColis.statuts = { 
+    idStatut: 4, // En attente 
+    libelStatut: 'PRISE_CHARGE'
+  };
     
     // Envoyer la requête
     this.priseEnChargeService.createPriseEnCharge(trajet)
@@ -426,6 +443,17 @@ export class TrajetCreateComponent implements OnInit {
         },
         error: (error) => {
           console.error('Erreur lors de la déclaration du trajet:', error);
+
+           // Message d'erreur plus détaillé
+      let errorMsg = 'Erreur lors de la déclaration du trajet';
+      if (error.error?.message) {
+        errorMsg += `: ${error.error.message}`;
+      } else if (error.status === 400) {
+        errorMsg += ': Données invalides';
+      } else if (error.status === 401) {
+        errorMsg += ': Authentification requise';
+      }
+
           this.snackBar.open('Erreur lors de la déclaration du trajet', 'Fermer', {
             duration: 5000,
             horizontalPosition: 'center',
@@ -435,4 +463,18 @@ export class TrajetCreateComponent implements OnInit {
         }
       });
   }
+
+  
+  dateRangeValidator(formGroup: FormGroup) {
+    const depart = formGroup.get('dateDepart')?.value;
+    const arrivee = formGroup.get('dateArrivee')?.value;
+    
+    if (depart && arrivee && new Date(depart) >= new Date(arrivee)) {
+      formGroup.get('dateArrivee')?.setErrors({ dateInvalid: true });
+      return { dateRange: true };
+    }
+    
+    return null;
+  }
+  
 }

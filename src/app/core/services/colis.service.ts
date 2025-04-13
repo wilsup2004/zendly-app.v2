@@ -75,6 +75,18 @@ export class ColisService {
     return this.http.get<Colis[]>(url);
   }
 
+   /**
+   * Récupère les colis compatibles avec un trajet
+   * @param origine La ville de départ
+   * @param destination La ville d'arrivée
+   * @returns Un Observable contenant la liste des colis
+   */
+   getColisDispoByTrajet(origine: string, destination: string, priseEnCharge: number): Observable<Colis[]> {
+    let url = `${this.apiUrl}/trajetDetail?origine=${origine}&destination=${destination}&id=${priseEnCharge}`;
+    
+    return this.http.get<Colis[]>(url);
+  }
+
   /**
    * Récupère l'image d'un colis
    * @param colisId L'ID du colis

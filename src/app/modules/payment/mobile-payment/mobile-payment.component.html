@@ -1,0 +1,91 @@
+<!-- src/app/modules/payment/mobile-payment/mobile-payment.component.html -->
+<div class="mobile-payment-container">
+  <header class="payment-header">
+    <h1>Paiement Mobile</h1>
+    <p>Effectuez le paiement via votre opérateur mobile</p>
+  </header>
+  
+  <mat-card *ngIf="!submitted" class="payment-card">
+    <mat-card-header>
+      <mat-card-title>Informations de paiement</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        <div class="provider-selection">
+          <label class="provider-label">Choisissez votre opérateur :</label>
+          <div class="provider-options">
+            <mat-button-toggle-group formControlName="provider">
+              <mat-button-toggle value="orange">
+                <img src="assets/images/orange-money-logo.png" alt="Orange Money" class="provider-logo">
+                Orange Money
+              </mat-button-toggle>
+              <mat-button-toggle value="mtn">
+                <img src="assets/images/mtn-mobile-money-logo.png" alt="MTN Mobile Money" class="provider-logo">
+                MTN Mobile Money
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </div>
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Numéro de téléphone</mat-label>
+          <input matInput formControlName="phoneNumber" placeholder="Ex: 0612345678" required>
+          <mat-icon matSuffix>phone</mat-icon>
+          <mat-error *ngIf="paymentForm.get('phoneNumber')?.hasError('required')">
+            Le numéro de téléphone est requis
+          </mat-error>
+          <mat-error *ngIf="paymentForm.get('phoneNumber')?.hasError('pattern')">
+            Format de numéro de téléphone invalide
+          </mat-error>
+        </mat-form-field>
+        
+        <div class="secure-payment-info">
+          <mat-icon>info</mat-icon>
+          <span>Vous recevrez une notification sur votre téléphone pour confirmer le paiement.</span>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" mat-button routerLink="/payment">Annuler</button>
+          <button 
+            type="submit" 
+            mat-raised-button 
+            color="primary" 
+            [disabled]="paymentForm.invalid || loading">
+            <span *ngIf="!loading">Procéder au paiement</span>
+            <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  
+  <mat-card *ngIf="submitted && !paymentConfirmed" class="confirmation-card">
+    <mat-card-header>
+      <mat-card-title>Confirmation du paiement</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="confirmation-content">
+        <div class="confirmation-icon">
+          <mat-icon>smartphone</mat-icon>
+        </div>
+        
+        <h3>Vérifiez votre téléphone</h3>
+        <p>Vous devriez recevoir une notification pour confirmer votre paiement.</p>
+        
+        <div class="countdown-container">
+          <div class="countdown">{{ formatCountdown() }}</div>
+          <p>Temps restant pour confirmer le paiement</p>
+        </div>
+        
+        <div class="confirmation-actions">
+          <button mat-stroked-button (click)="cancelPayment()">
+            <mat-icon>cancel</mat-icon>
+            Annuler le paiement
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

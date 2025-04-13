@@ -106,10 +106,10 @@ export class TrajetDetailComponent implements OnInit {
     
     // Si l'utilisateur est le propriétaire du trajet, charger les colis qui correspondent au trajet
     if (this.isOwner) {
-      this.colisService.getColisByTrajetAndStatut(
+      this.colisService.getColisDispoByTrajet(
         this.trajet.villeDepart,
         this.trajet.villeArrivee,
-        1
+        this.trajet.idPrise
       )
       .pipe(finalize(() => {
         this.loadingColis = false;

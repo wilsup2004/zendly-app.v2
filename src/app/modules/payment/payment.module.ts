@@ -8,6 +8,7 @@ import { PaymentComponent } from './payment.component';
 import { PaymentListComponent } from './payment-list/payment-list.component';
 import { PaymentSuccessComponent } from './payment-success/payment-success.component';
 import { PaymentCancelComponent } from './payment-cancel/payment-cancel.component';
+import { MobilePaymentComponent } from './mobile-payment/mobile-payment.component';
 
 // Angular Material
 import { MatCardModule } from '@angular/material/card';
@@ -23,6 +24,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
 import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
@@ -30,7 +33,8 @@ import { SharedModule } from '../../shared/shared.module';
     PaymentComponent,
     PaymentListComponent,
     PaymentSuccessComponent,
-    PaymentCancelComponent
+    PaymentCancelComponent,
+    MobilePaymentComponent
   ],
   imports: [
     CommonModule,
@@ -50,6 +54,8 @@ import { SharedModule } from '../../shared/shared.module';
     MatTableModule,
     MatSortModule,
     MatTooltipModule,
+    MatButtonToggleModule,
+    MatDialogModule,
     SharedModule
   ]
 })

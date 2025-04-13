@@ -3,6 +3,9 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: var(--background-color);
+  background-image: var(--background-gradient);
+  color: var(--text-color);
 }
 
 .payment-list-header {
@@ -12,10 +15,12 @@
     margin-bottom: 8px;
     font-size: 24px;
     font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 8px;
   }
   
-  p {
-    color: rgba(0, 0, 0, 0.6);
+  p {    
+    color: var(--text-color-secondary);
     margin: 0;
   }
 }
@@ -55,6 +60,7 @@
   
   .mat-header-cell {
     font-weight: 500;
+    
   }
   
   .mat-row {
